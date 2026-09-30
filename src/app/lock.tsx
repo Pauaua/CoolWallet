@@ -1,44 +1,60 @@
-import { View } from 'react-native';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useRef } from 'react';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText, Button, Icon } from '@/components';
-import { useLockStore } from '@/store/lockStore';
+import { AppText, Avatar, Button } from '@/components';
+import { useProfile } from '@/features/profile/queries';
+import { PinEntry } from '@/features/security/PinEntry';
+import { requestBiometricAuth, useBiometricSupport } from '@/features/security/useBiometrics';
+import { useSettings } from '@/features/settings/queries';
+import { useSessionStore } from '@/store/sessionStore';
 import { useTheme } from '@/theme';
 
-/**
- * Pantalla de bloqueo. En la fase 1 solo tiene el botón "Desbloquear";
- * en la fase 3 se reemplaza por el ingreso de PIN y la biometría.
- */
+/** Pantalla de bloqueo: PIN o huella/Face ID. */
 export default function LockScreen() {
   const { colors, spacing } = useTheme();
-  const unlock = useLockStore((state) => state.unlock);
+  const unlock = useSessionStore((state) => state.unlock);
+  const profile = useProfile();
+  const settings = useSettings();
+  const support = useBiometricSupport();
+  const autoPrompted = useRef(false);
+
+  const canUseBiometrics = Boolean(settings.data?.biometricsEnabled && support.data?.available);
+  const biometricLabel = support.data?.label ?? 'biometría';
+
+  const tryBiometrics = useCallback(async () => {
+    if (await requestBiometricAuth()) unlock();
+  }, [unlock]);
+
+  // Al llegar a la pantalla se ofrece la biometría una vez automáticamente.
+  useEffect(() => {
+    if (canUseBiometrics && !autoPrompted.current) {
+      autoPrompted.current = true;
+      void tryBiometrics();
+    }
+  }, [canUseBiometrics, tryBiometrics]);
+
+  const name = profile.data?.name ?? '';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ flex: 1, justifyContent: 'center', padding: spacing.xl, gap: spacing.lg }}>
-        <View
-          style={{
-            alignSelf: 'center',
-            width: 88,
-            height: 88,
-            borderRadius: 44,
-            backgroundColor: colors.primarySoft,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Icon name="lock" size={36} color="primary" />
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing.xl, gap: spacing.xl }}>
+        <View style={{ alignItems: 'center', gap: spacing.md }}>
+          <Avatar name={name} photoUri={profile.data?.photoUri} size={72} />
+          <AppText variant="title" align="center">
+            {name ? `Hola, ${name.split(' ')[0]}` : 'Hola'}
+          </AppText>
         </View>
-        <AppText variant="title" align="center" accessibilityRole="header">
-          App bloqueada
-        </AppText>
-        <AppText color="textSecondary" align="center">
-          Tus datos están protegidos en este dispositivo.
-        </AppText>
-        <View style={{ marginTop: spacing.lg }}>
-          <Button label="Desbloquear" icon="unlock" onPress={unlock} />
-        </View>
-      </View>
+
+        <PinEntry
+          title="App bloqueada"
+          onSuccess={unlock}
+          extraAction={canUseBiometrics ? { icon: 'unlock', accessibilityLabel: `Usar ${biometricLabel}`, onPress: () => void tryBiometrics() } : undefined}
+        />
+
+        <Button label="Olvidé mi PIN" variant="ghost" onPress={() => router.push('/olvide-pin')} />
+      </ScrollView>
     </SafeAreaView>
   );
 }

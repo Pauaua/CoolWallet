@@ -1,4 +1,4 @@
-import { formatCLP, formatPercent, parseCLPInput } from '../format';
+import { formatAmountInput, formatCLP, formatDecimalInput, formatPercent, parseCLPInput, parseDecimalInput } from '../format';
 import { ceilMoney, floorMoney, percentageOf, roundMoney, sumAmounts } from '../money';
 import { DEFAULT_INDICATORS, staticIndicatorsSource } from '../params';
 
@@ -32,6 +32,44 @@ describe('parseCLPInput', () => {
 
   it.each(['', '   ', '$', 'abc', '12a', '1,2,3', '--5'])('"%s" → null', (text) => {
     expect(parseCLPInput(text)).toBeNull();
+  });
+});
+
+describe('parseDecimalInput', () => {
+  it.each([
+    ['1,44', 1.44],
+    ['1.44', 1.44],
+    ['3', 3],
+    [' 2,5 ', 2.5],
+    ['1.234,5', 1234.5],
+    ['0,58', 0.58],
+    ['-1,5', -1.5],
+    ['7,', 7],
+  ])('"%s" → %d', (text, expected) => {
+    expect(parseDecimalInput(text)).toBe(expected);
+  });
+
+  it.each(['', 'abc', '1,2,3', '1.2.3', ',5'])('"%s" → null', (text) => {
+    expect(parseDecimalInput(text)).toBeNull();
+  });
+});
+
+describe('formatDecimalInput / formatAmountInput', () => {
+  it('formatea para editar', () => {
+    expect(formatDecimalInput(1.44)).toBe('1,44');
+    expect(formatDecimalInput(1234.5)).toBe('1234,5');
+    expect(formatDecimalInput(0.123456, 2)).toBe('0,12');
+    expect(formatAmountInput(1_234_567)).toBe('1.234.567');
+    expect(formatAmountInput(0)).toBe('0');
+  });
+
+  it('valores vacíos quedan en blanco', () => {
+    expect(formatDecimalInput(null)).toBe('');
+    expect(formatDecimalInput(undefined)).toBe('');
+    expect(formatDecimalInput(NaN)).toBe('');
+    expect(formatAmountInput(null)).toBe('');
+    expect(formatAmountInput(undefined)).toBe('');
+    expect(formatAmountInput(Infinity)).toBe('');
   });
 });
 

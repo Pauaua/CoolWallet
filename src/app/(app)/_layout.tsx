@@ -1,16 +1,31 @@
+import { router } from 'expo-router';
 import { Drawer, type DrawerContentComponentProps } from 'expo-router/drawer';
 
 import { IconButton } from '@/components';
 import { DrawerPanel } from '@/features/navigation/DrawerPanel';
 import { APP_MODULES } from '@/features/navigation/modules';
-import { useLockStore } from '@/store/lockStore';
+import { useProfile } from '@/features/profile/queries';
+import { useSessionStore } from '@/store/sessionStore';
 import { useTheme } from '@/theme';
+
+/** Pantallas secundarias (fuera del menú) que muestran "Volver" en vez de la hamburguesa. */
+const SECONDARY_SCREENS = [
+  { name: 'perfil', title: 'Perfil' },
+  { name: 'seguridad', title: 'Seguridad' },
+  { name: 'cambiar-pin', title: 'Cambiar PIN' },
+] as const;
+
+function goBack() {
+  if (router.canGoBack()) router.back();
+  else router.navigate('/');
+}
 
 export default function AppLayout() {
   const { colors, typography, spacing } = useTheme();
 
   return (
     <Drawer
+      backBehavior="history"
       drawerContent={(props) => <AppDrawerContent {...props} />}
       screenOptions={({ navigation }) => ({
         drawerPosition: 'left',
@@ -23,28 +38,43 @@ export default function AppLayout() {
         headerTitleStyle: typography.heading,
         headerTitleAlign: 'left',
         headerLeftContainerStyle: { paddingLeft: spacing.xs },
-        headerLeft: () => (
-          <IconButton icon="menu" accessibilityLabel="Abrir menú" onPress={() => navigation.toggleDrawer()} />
-        ),
+        headerLeft: () => <IconButton icon="menu" accessibilityLabel="Abrir menú" onPress={() => navigation.toggleDrawer()} />,
         sceneStyle: { backgroundColor: colors.background },
       })}
     >
       {APP_MODULES.map((module) => (
         <Drawer.Screen key={module.route} name={module.route} options={{ title: module.title }} />
       ))}
+      {SECONDARY_SCREENS.map((screen) => (
+        <Drawer.Screen
+          key={screen.name}
+          name={screen.name}
+          options={{
+            title: screen.title,
+            swipeEnabled: false,
+            headerLeft: () => <IconButton icon="arrow-left" accessibilityLabel="Volver" onPress={goBack} />,
+          }}
+        />
+      ))}
     </Drawer>
   );
 }
 
 function AppDrawerContent({ state, navigation }: DrawerContentComponentProps) {
-  const lock = useLockStore((s) => s.lock);
+  const lock = useSessionStore((s) => s.lock);
+  const profile = useProfile();
   const activeRoute = state.routes[state.index]?.name ?? 'index';
 
   return (
     <DrawerPanel
-      userName=""
+      userName={profile.data?.name ?? ''}
+      photoUri={profile.data?.photoUri}
       activeRoute={activeRoute}
       onNavigate={(route) => navigation.navigate(route)}
+      onProfilePress={() => {
+        navigation.closeDrawer();
+        router.push('/perfil');
+      }}
       onLock={() => {
         navigation.closeDrawer();
         lock();

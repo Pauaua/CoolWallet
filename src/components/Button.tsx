@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
-import { MIN_TOUCH_TARGET, useTheme } from '@/theme';
+import { MIN_TOUCH_TARGET, useTheme, type ColorTokens } from '@/theme';
 
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
@@ -8,36 +8,50 @@ import { Icon, type IconName } from './Icon';
 type ButtonProps = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  /** `primary`: acción principal · `secondary`: con borde · `ghost`: solo texto · `danger`: destructiva. */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   icon?: IconName;
   disabled?: boolean;
+  loading?: boolean;
 };
 
-export function Button({ label, onPress, variant = 'primary', icon, disabled = false }: ButtonProps) {
+const VARIANT_COLORS: Record<NonNullable<ButtonProps['variant']>, { background: keyof ColorTokens | null; border: keyof ColorTokens | null; content: keyof ColorTokens }> = {
+  primary: { background: 'primary', border: 'primary', content: 'onPrimary' },
+  secondary: { background: 'surface', border: 'border', content: 'primary' },
+  ghost: { background: null, border: null, content: 'primary' },
+  danger: { background: 'danger', border: 'danger', content: 'onPrimary' },
+};
+
+export function Button({ label, onPress, variant = 'primary', icon, disabled = false, loading = false }: ButtonProps) {
   const { colors, radius, spacing } = useTheme();
-  const isPrimary = variant === 'primary';
-  const contentColor = isPrimary ? 'onPrimary' : 'primary';
+  const palette = VARIANT_COLORS[variant];
+  const inactive = disabled || loading;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled}
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: inactive, busy: loading }}
+      disabled={inactive}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
         {
           borderRadius: radius.md,
           paddingHorizontal: spacing.xl,
-          backgroundColor: isPrimary ? colors.primary : colors.surface,
-          borderColor: isPrimary ? colors.primary : colors.border,
+          backgroundColor: palette.background ? colors[palette.background] : 'transparent',
+          borderColor: palette.border ? colors[palette.border] : 'transparent',
           opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
         },
       ]}
     >
       <View style={[styles.content, { gap: spacing.sm }]}>
-        {icon ? <Icon name={icon} size={18} color={contentColor} /> : null}
-        <AppText variant="bodyStrong" color={contentColor}>
+        {loading ? (
+          <ActivityIndicator size="small" color={colors[palette.content]} />
+        ) : icon ? (
+          <Icon name={icon} size={18} color={palette.content} />
+        ) : null}
+        <AppText variant="bodyStrong" color={palette.content}>
           {label}
         </AppText>
       </View>

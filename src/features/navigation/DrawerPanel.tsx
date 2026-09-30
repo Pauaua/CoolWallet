@@ -8,29 +8,38 @@ import { APP_MODULES, type AppModule } from './modules';
 
 type DrawerPanelProps = {
   userName: string;
+  photoUri?: string | null;
   activeRoute: string;
   onNavigate: (route: AppModule['route']) => void;
+  onProfilePress: () => void;
   onLock: () => void;
 };
 
 /** Contenido de la barra lateral: perfil arriba, módulos al centro y "Bloquear app" fijo abajo. */
-export function DrawerPanel({ userName, activeRoute, onNavigate, onLock }: DrawerPanelProps) {
+export function DrawerPanel({ userName, photoUri, activeRoute, onNavigate, onProfilePress, onLock }: DrawerPanelProps) {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const displayName = userName.trim() || 'Tu perfil';
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.surface, paddingTop: insets.top }}>
-      <View style={[styles.profile, { padding: spacing.xl, gap: spacing.md }]}>
-        <Avatar name={userName} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${displayName}. Ver y editar perfil`}
+        onPress={onProfilePress}
+        style={({ pressed }) => [styles.profile, { padding: spacing.xl, gap: spacing.md, opacity: pressed ? 0.7 : 1 }]}
+      >
+        <Avatar name={userName} photoUri={photoUri} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading" numberOfLines={1}>
-            {userName.trim() || 'Tu perfil'}
+            {displayName}
           </AppText>
           <AppText variant="caption" color="textSecondary">
-            Control de gastos
+            Ver perfil
           </AppText>
         </View>
-      </View>
+        <Icon name="chevron-right" color="textSecondary" size={18} />
+      </Pressable>
       <Divider />
 
       <ScrollView contentContainerStyle={{ padding: spacing.md, gap: spacing.xs }}>

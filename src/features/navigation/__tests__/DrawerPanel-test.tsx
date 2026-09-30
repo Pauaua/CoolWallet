@@ -14,6 +14,7 @@ async function renderPanel(overrides: Partial<Parameters<typeof DrawerPanel>[0]>
     userName: 'Camila Rojas',
     activeRoute: 'index',
     onNavigate: jest.fn(),
+    onProfilePress: jest.fn(),
     onLock: jest.fn(),
     ...overrides,
   };
@@ -49,6 +50,12 @@ describe('DrawerPanel', () => {
     const { onNavigate } = await renderPanel();
     await fireEvent.press(screen.getByRole('button', { name: 'Deudas' }));
     expect(onNavigate).toHaveBeenCalledWith('deudas');
+  });
+
+  it('abre el perfil al tocar el encabezado', async () => {
+    const { onProfilePress } = await renderPanel();
+    await fireEvent.press(screen.getByRole('button', { name: 'Camila Rojas. Ver y editar perfil' }));
+    expect(onProfilePress).toHaveBeenCalledTimes(1);
   });
 
   it('bloquea la app al tocar "Bloquear app"', async () => {

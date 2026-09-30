@@ -24,6 +24,31 @@ export function parseCLPInput(text: string): number | null {
 }
 
 /**
+ * Convierte el texto de un input decimal (UF, porcentajes) a número.
+ * Acepta coma decimal (`"1,44"`), punto decimal si no hay coma (`"1.44"`)
+ * y puntos de miles cuando hay coma (`"1.234,5"`).
+ * @returns El número, o `null` si el texto está vacío o no es válido.
+ */
+export function parseDecimalInput(text: string): number | null {
+  const compact = text.replace(/\s/g, '');
+  const normalized = compact.includes(',') ? compact.replace(/\./g, '').replace(',', '.') : compact;
+  if (!/^-?\d+(\.\d*)?$/.test(normalized)) return null;
+  return Number(normalized);
+}
+
+/** Muestra un decimal para editarlo en un input: `1.44` → `"1,44"` (sin separador de miles). */
+export function formatDecimalInput(value: number | null | undefined, maxDecimals = 4): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '';
+  return new Intl.NumberFormat('es-CL', { maximumFractionDigits: maxDecimals, useGrouping: false }).format(value);
+}
+
+/** Muestra un monto para editarlo en un input: `1234567` → `"1.234.567"`; `null` → `""`. */
+export function formatAmountInput(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '';
+  return integerFormatter.format(Math.round(value));
+}
+
+/**
  * Formatea un porcentaje en estilo chileno: `23.456` → `"23%"`, con 1 decimal `"23,5%"`.
  * `null` (porcentaje no calculable) → `"—"`.
  */
