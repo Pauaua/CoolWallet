@@ -4,11 +4,13 @@ import {
   calcDebtProgress,
   calcDebtToIncomeRatio,
   calcInstallment,
+  calcOutstandingPrincipal,
   calcMonthlyDebtCommitment,
   calcRemainingBalance,
   calcRemainingInstallments,
   calcTotalInterest,
   comparePayoffStrategies,
+  estimateDebtFreeDate,
   estimateEndDate,
   getDebtRiskLevel,
   getDebtStatus,
@@ -16,6 +18,7 @@ import {
   getNextDueDate,
   orderDebtsByStrategy,
   simulatePayoff,
+  toPayoffDebt,
   type FinanceDebt,
   type PayoffDebt,
 } from '../debts';
@@ -301,5 +304,51 @@ describe('simulador de pago', () => {
     expect(comparison.snowball.months).toBe(5);
     expect(comparison.snowballInterestSaved).toBeNull();
     expect(comparison.avalancheInterestSaved).toBeNull();
+  });
+});
+
+describe('calcOutstandingPrincipal / toPayoffDebt', () => {
+  it('en cuotas con tasa: saldo de la tabla de amortización', () => {
+    const table = buildAmortizationTable(1_000_000, 0.02, 12);
+    expect(calcOutstandingPrincipal(consumerLoan)).toBe(table[3]?.balance);
+    expect(calcOutstandingPrincipal({ ...consumerLoan, installmentsPaid: 0 })).toBe(1_000_000);
+    expect(calcOutstandingPrincipal({ ...consumerLoan, installmentsPaid: 12 })).toBe(0);
+    expect(calcOutstandingPrincipal({ ...consumerLoan, installmentsPaid: 20 })).toBe(0);
+  });
+
+  it('en cuotas sin tasa y otras deudas: saldo por pagar', () => {
+    expect(calcOutstandingPrincipal({ ...consumerLoan, monthlyRate: 0, installmentAmount: 50_000 })).toBe(400_000);
+    expect(calcOutstandingPrincipal(friendDebt)).toBe(70_000);
+    expect(calcOutstandingPrincipal({ kind: 'installment', principal: 1_000, paidAmount: 0 })).toBe(0);
+  });
+
+  it('formato del simulador', () => {
+    expect(toPayoffDebt('loan', consumerLoan)).toEqual({
+      id: 'loan',
+      balance: calcOutstandingPrincipal(consumerLoan),
+      monthlyRate: 0.02,
+      minimumPayment: 94_560,
+    });
+    expect(toPayoffDebt('friend', friendDebt)).toEqual({ id: 'friend', balance: 70_000, monthlyRate: 0, minimumPayment: 0 });
+    expect(toPayoffDebt('done', { ...consumerLoan, installmentsPaid: 12 }).minimumPayment).toBe(0);
+  });
+});
+
+describe('estimateDebtFreeDate', () => {
+  it('suma meses a la fecha de hoy', () => {
+    expect(estimateDebtFreeDate('2026-09-30', 5)).toBe('2027-02-28');
+    expect(estimateDebtFreeDate('2026-09-30', 0)).toBe('2026-09-30');
+    expect(estimateDebtFreeDate('2026-09-30', -3)).toBe('2026-09-30');
+  });
+});
+
+describe('abonos extra en deudas en cuotas', () => {
+  it('rebajan el saldo por pagar y el capital pendiente, sin bajar de 0', () => {
+    expect(calcRemainingBalance({ ...consumerLoan, extraPaidAmount: 56_480 })).toBe(700_000);
+    expect(calcRemainingBalance({ ...consumerLoan, extraPaidAmount: 5_000_000 })).toBe(0);
+    const base = calcOutstandingPrincipal(consumerLoan);
+    expect(calcOutstandingPrincipal({ ...consumerLoan, extraPaidAmount: 100_000 })).toBe(base - 100_000);
+    expect(calcOutstandingPrincipal({ ...consumerLoan, installmentsPaid: 0, extraPaidAmount: 200_000 })).toBe(800_000);
+    expect(getDebtStatus({ ...consumerLoan, extraPaidAmount: 5_000_000 }, TODAY)).toBe('paid');
   });
 });

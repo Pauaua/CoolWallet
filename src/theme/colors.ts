@@ -17,6 +17,8 @@ export type ColorTokens = {
   textSecondary: string;
   success: string;
   warning: string;
+  /** Variante de `warning` con contraste AA para texto e íconos de estado. */
+  warningText: string;
   danger: string;
   /** Velo detrás de modales y del drawer. */
   overlay: string;
@@ -40,6 +42,7 @@ export const lightColors: ColorTokens = {
   textSecondary: '#5B6F66',
   success: '#2E9E6B',
   warning: '#D9A13B',
+  warningText: '#8A5A0B',
   danger: '#C4524A',
   overlay: 'rgba(22, 38, 31, 0.45)',
   shadow: '#0B1A13',
@@ -61,6 +64,7 @@ export const darkColors: ColorTokens = {
   textSecondary: '#9DB2A8',
   success: '#3DB77F',
   warning: '#E0B055',
+  warningText: '#E0B055',
   danger: '#D9695F',
   overlay: 'rgba(0, 0, 0, 0.6)',
   shadow: '#000000',

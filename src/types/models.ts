@@ -19,6 +19,10 @@ export type FixedExpense = typeof schema.fixedExpenses.$inferSelect;
 export type FixedExpenseInput = Omit<FixedExpense, SystemFields>;
 export type FixedExpenseOccurrence = typeof schema.fixedExpenseOccurrences.$inferSelect;
 
+export type Debt = typeof schema.debts.$inferSelect;
+export type DebtInput = Omit<Debt, SystemFields>;
+export type DebtPayment = typeof schema.debtPayments.$inferSelect;
+
 export type Transaction = typeof schema.transactions.$inferSelect;
 /** Datos de un movimiento nuevo; los vínculos a gastos fijos/deudas y el flag de sueldo son opcionales. */
 export type TransactionInput = Omit<Transaction, SystemFields | 'fixedExpenseId' | 'debtId' | 'isSalary'> &

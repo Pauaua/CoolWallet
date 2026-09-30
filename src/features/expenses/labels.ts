@@ -33,8 +33,8 @@ export const CATEGORY_ICONS: readonly IconName[] = [
 export const OCCURRENCE_STATUS_META: Record<OccurrenceStatus, { label: (days: number) => string; color: keyof ColorTokens; icon: IconName }> = {
   paid: { label: () => 'Pagado', color: 'primary', icon: 'check-circle' },
   overdue: { label: () => 'Vencido', color: 'danger', icon: 'alert-circle' },
-  due_today: { label: () => 'Vence hoy', color: 'warning', icon: 'clock' },
-  due_soon: { label: (days) => (days === 1 ? 'Vence mañana' : `Vence en ${days} días`), color: 'warning', icon: 'clock' },
+  due_today: { label: () => 'Vence hoy', color: 'warningText', icon: 'clock' },
+  due_soon: { label: (days) => (days === 1 ? 'Vence mañana' : `Vence en ${days} días`), color: 'warningText', icon: 'clock' },
   upcoming: { label: () => 'Pendiente', color: 'textSecondary', icon: 'circle' },
 };
 

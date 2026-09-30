@@ -22,6 +22,13 @@
       "when": 1790788934843,
       "tag": "0002_rename_ant_to_variable",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790796613744,
+      "tag": "0003_debt_start_date",
+      "breakpoints": true
     }
   ]
 }

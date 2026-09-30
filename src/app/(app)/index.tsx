@@ -2,6 +2,8 @@ import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { AppText, Avatar, Card, Divider, ErrorState, ListLink, LoadingState, Screen, SectionHeader, StatCard } from '@/components';
+import { DEBT_RISK_META } from '@/features/debts/labels';
+import { useDebtsSummary } from '@/features/debts/queries';
 import { SalaryPendingCard } from '@/features/wallet/SalaryPendingCard';
 import { useWalletSummary } from '@/features/wallet/useWalletSummary';
 import { formatPeriodRange } from '@/lib/dates';
@@ -12,6 +14,7 @@ import { useTheme } from '@/theme';
 export default function HomeScreen() {
   const { spacing } = useTheme();
   const wallet = useWalletSummary();
+  const debts = useDebtsSummary();
 
   if (wallet.isPending) return <LoadingState />;
   if (wallet.isError || !wallet.data) return <ErrorState onRetry={() => void wallet.refetch()} />;
@@ -57,7 +60,21 @@ export default function HomeScreen() {
           caption="En tus cuentas hoy"
           onPress={() => router.push('/billetera')}
         />
-        <StatCard icon="file-text" label="Deudas" value="—" caption="Regístralas en Deudas para ver el total" onPress={() => router.push('/deudas')} />
+        <StatCard
+          icon="file-text"
+          label="Deudas"
+          value={debts.data ? formatCLP(debts.data.totalDebt) : '—'}
+          caption={
+            !debts.data
+              ? debts.isError
+                ? 'No pudimos cargar tus deudas'
+                : 'Cargando…'
+              : debts.data.active.length === 0
+                ? 'Sin deudas pendientes'
+                : `${DEBT_RISK_META[debts.data.risk].label} · ${debts.data.ratio === null ? 'sin ratio' : formatPercent(debts.data.ratio)} de tu ingreso en cuotas`
+          }
+          onPress={() => router.push('/deudas')}
+        />
       </View>
 
       <SectionHeader title="Tu cuenta" />

@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, inArray, isNull, lte, type SQL } from 'drizzle-orm';
 
-import { fixedExpenseOccurrences, transactions } from '@/db/schema';
+import { debtPayments, fixedExpenseOccurrences, transactions } from '@/db/schema';
 
 import { NotFoundError, newRowFields, type RepositoryContext } from '../context';
 import type { TransactionFilter, TransactionsRepository } from '../types';
@@ -43,14 +43,21 @@ export function createTransactionsRepository(ctx: RepositoryContext): Transactio
     },
 
     async update(id, patch) {
-      const updated = db
-        .update(transactions)
-        .set({ ...patch, updatedAt: ctx.now() })
-        .where(active(id))
-        .returning()
-        .get();
-      if (!updated) throw new NotFoundError('Movimiento', id);
-      return updated;
+      return db.transaction((tx) => {
+        const updated = tx
+          .update(transactions)
+          .set({ ...patch, updatedAt: ctx.now() })
+          .where(active(id))
+          .returning()
+          .get();
+        if (!updated) throw new NotFoundError('Movimiento', id);
+        // Un abono editado desde el historial mantiene su registro de pago al día.
+        tx.update(debtPayments)
+          .set({ amount: updated.amount, date: updated.date, accountId: updated.accountId, updatedAt: ctx.now() })
+          .where(and(eq(debtPayments.transactionId, id), isNull(debtPayments.deletedAt)))
+          .run();
+        return updated;
+      });
     },
 
     async remove(id) {
@@ -61,6 +68,11 @@ export function createTransactionsRepository(ctx: RepositoryContext): Transactio
         tx.update(fixedExpenseOccurrences)
           .set({ status: 'pending', transactionId: null, paidAt: null, updatedAt: timestamp })
           .where(eq(fixedExpenseOccurrences.transactionId, id))
+          .run();
+        // Si era un abono a una deuda, el abono también se elimina.
+        tx.update(debtPayments)
+          .set({ deletedAt: timestamp, updatedAt: timestamp })
+          .where(and(eq(debtPayments.transactionId, id), isNull(debtPayments.deletedAt)))
           .run();
       });
     },

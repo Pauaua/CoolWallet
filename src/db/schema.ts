@@ -164,6 +164,8 @@ export const debts = sqliteTable('debts', {
   installmentsPaidInitial: integer('installments_paid_initial').notNull().default(0),
   installmentAmount: integer('installment_amount'),
   monthlyRate: real('monthly_rate'),
+  /** Fecha en que se contrajo la deuda (`yyyy-MM-dd`). */
+  startDate: text('start_date'),
   firstPaymentDate: text('first_payment_date'),
   dueDate: text('due_date'),
   accountId: text('account_id').references(() => accounts.id),

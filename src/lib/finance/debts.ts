@@ -23,6 +23,8 @@ export type FinanceDebt = {
   installmentsTotal?: number;
   /** En cuotas: cuotas ya pagadas. */
   installmentsPaid?: number;
+  /** En cuotas: abonos extra (que no son una cuota completa); rebajan el saldo. */
+  extraPaidAmount?: number;
   /** En cuotas: valor de la cuota. Si falta, se calcula con la fórmula francesa. */
   installmentAmount?: number;
   /** Tasa de interés mensual (0.015 = 1,5%). */
@@ -96,12 +98,12 @@ export function calcRemainingInstallments(debt: FinanceDebt): number | null {
 
 /**
  * Saldo por pagar.
- * - En cuotas: cuotas restantes × valor cuota (lo que aún se desembolsará).
+ * - En cuotas: cuotas restantes × valor cuota − abonos extra (lo que aún se desembolsará).
  * - Pendiente/variable: monto − abonos.
  */
 export function calcRemainingBalance(debt: FinanceDebt): number {
   if (debt.kind === 'installment') {
-    return roundMoney((calcRemainingInstallments(debt) ?? 0) * getInstallmentAmount(debt));
+    return Math.max(0, roundMoney((calcRemainingInstallments(debt) ?? 0) * getInstallmentAmount(debt) - (debt.extraPaidAmount ?? 0)));
   }
   return Math.max(0, roundMoney(debt.principal - debt.paidAmount));
 }
@@ -317,4 +319,37 @@ export function comparePayoffStrategies(debts: readonly PayoffDebt[], extraMonth
     snowballInterestSaved: saved(snowball),
     avalancheInterestSaved: saved(avalanche),
   };
+}
+
+/**
+ * Capital que queda por pagar (sin intereses futuros), base del simulador.
+ * - En cuotas con tasa: saldo de la tabla de amortización tras las cuotas pagadas.
+ * - En cuotas sin tasa: cuotas restantes × cuota.
+ * - Pendiente/variable: monto − abonos.
+ */
+export function calcOutstandingPrincipal(debt: FinanceDebt): number {
+  if (debt.kind !== 'installment') return calcRemainingBalance(debt);
+  const total = debt.installmentsTotal ?? 0;
+  const paid = Math.min(debt.installmentsPaid ?? 0, total);
+  if (paid >= total) return 0;
+  if (!debt.monthlyRate || debt.monthlyRate <= 0) return calcRemainingBalance(debt);
+  const extra = debt.extraPaidAmount ?? 0;
+  if (paid === 0) return Math.max(0, roundMoney(debt.principal - extra));
+  const row = buildAmortizationTable(debt.principal, debt.monthlyRate, total)[paid - 1];
+  return Math.max(0, (row ? row.balance : 0) - extra);
+}
+
+/** Convierte una deuda al formato del simulador (saldo = capital pendiente; mínimo = cuota). */
+export function toPayoffDebt(id: string, debt: FinanceDebt): PayoffDebt {
+  return {
+    id,
+    balance: calcOutstandingPrincipal(debt),
+    monthlyRate: Math.max(0, debt.monthlyRate ?? 0),
+    minimumPayment: debt.kind === 'installment' && calcRemainingBalance(debt) > 0 ? getInstallmentAmount(debt) : 0,
+  };
+}
+
+/** Fecha estimada en que se termina de pagar: `months` meses después de `from`. */
+export function estimateDebtFreeDate(from: IsoDate | Date, months: number): IsoDate {
+  return toIsoDate(addMonths(parseIsoDate(from), Math.max(0, Math.trunc(months))));
 }

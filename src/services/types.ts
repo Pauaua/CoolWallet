@@ -5,6 +5,9 @@ import type {
   AccountInput,
   Category,
   CategoryInput,
+  Debt,
+  DebtInput,
+  DebtPayment,
   FixedExpense,
   FixedExpenseInput,
   FixedExpenseOccurrence,
@@ -107,6 +110,30 @@ export interface FixedExpensesRepository {
   markPending(occurrenceId: string): Promise<void>;
 }
 
+export type DebtPaymentInput = {
+  amount: number;
+  date: IsoDate;
+  accountId: string | null;
+  /** Si corresponde a una cuota (deudas en cuotas). */
+  isInstallment: boolean;
+};
+
+export interface DebtsRepository {
+  /** Deudas no eliminadas (incluidas las ya pagadas). */
+  list(): Promise<Debt[]>;
+  getById(id: string): Promise<Debt | null>;
+  create(input: DebtInput): Promise<Debt>;
+  update(id: string, patch: Partial<DebtInput>): Promise<Debt>;
+  /** Borrado lógico de la deuda; sus pagos quedan en el historial. */
+  remove(id: string): Promise<void>;
+  /** Pagos activos (de una deuda o de todas), del más reciente al más antiguo. */
+  listPayments(debtId?: string): Promise<DebtPayment[]>;
+  /** Registra un abono: crea el movimiento `debt_payment` en la billetera y el pago. */
+  addPayment(debtId: string, payment: DebtPaymentInput): Promise<DebtPayment>;
+  /** Elimina un abono y su movimiento. */
+  removePayment(paymentId: string): Promise<void>;
+}
+
 export interface DataRepository {
   /** Crea categorías y cuentas por defecto si la base está vacía. */
   seedDefaults(): Promise<void>;
@@ -121,5 +148,6 @@ export type Repositories = {
   categories: CategoriesRepository;
   transactions: TransactionsRepository;
   fixedExpenses: FixedExpensesRepository;
+  debts: DebtsRepository;
   data: DataRepository;
 };

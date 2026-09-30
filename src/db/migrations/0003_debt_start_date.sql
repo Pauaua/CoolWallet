@@ -1,0 +1,1 @@
+ALTER TABLE `debts` ADD `start_date` text;
