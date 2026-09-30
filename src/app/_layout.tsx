@@ -97,6 +97,7 @@ function RootNavigator() {
         </Stack.Protected>
         <Stack.Protected guard={isOnboarded && !isLocked}>
           <Stack.Screen name="(app)" />
+          <Stack.Screen name="(modals)" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         </Stack.Protected>
       </Stack>
     </ThemeProvider>

@@ -107,10 +107,13 @@ export const transactions = sqliteTable(
     note: text('note'),
     fixedExpenseId: text('fixed_expense_id').references(() => fixedExpenses.id),
     debtId: text('debt_id').references(() => debts.id),
+    /** Ingreso de sueldo registrado con "¿Recibiste tu sueldo?" (uno por período). */
+    isSalary: integer('is_salary', { mode: 'boolean' }).notNull().default(false),
     ...timestamps,
   },
   (table) => [
     index('transactions_date_idx').on(table.date),
+    index('transactions_account_idx').on(table.accountId),
     index('transactions_category_idx').on(table.categoryId),
     index('transactions_type_date_idx').on(table.type, table.date),
   ],

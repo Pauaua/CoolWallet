@@ -13,3 +13,4 @@ export * from './params';
 export * from './period';
 export * from './salary';
 export * from './types';
+export * from './wallet';

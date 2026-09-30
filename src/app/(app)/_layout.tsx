@@ -11,6 +11,9 @@ import { useTheme } from '@/theme';
 /** Pantallas secundarias (fuera del menú) que muestran "Volver" en vez de la hamburguesa. */
 const SECONDARY_SCREENS = [
   { name: 'perfil', title: 'Perfil' },
+  { name: 'sueldo', title: 'Sueldo líquido' },
+  { name: 'configuracion', title: 'Configuración' },
+  { name: 'historial', title: 'Historial' },
   { name: 'seguridad', title: 'Seguridad' },
   { name: 'cambiar-pin', title: 'Cambiar PIN' },
 ] as const;

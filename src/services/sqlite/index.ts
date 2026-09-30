@@ -6,6 +6,7 @@ import { createCategoriesRepository } from './categoriesRepository';
 import { createDataRepository } from './dataRepository';
 import { createProfileRepository } from './profileRepository';
 import { createSettingsRepository } from './settingsRepository';
+import { createTransactionsRepository } from './transactionsRepository';
 
 /** Repositorios respaldados por SQLite (Drizzle). */
 export function createSqliteRepositories(ctx: RepositoryContext): Repositories {
@@ -14,6 +15,7 @@ export function createSqliteRepositories(ctx: RepositoryContext): Repositories {
     settings: createSettingsRepository(ctx),
     accounts: createAccountsRepository(ctx),
     categories: createCategoriesRepository(ctx),
+    transactions: createTransactionsRepository(ctx),
     data: createDataRepository(ctx),
   };
 }

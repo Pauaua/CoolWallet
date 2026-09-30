@@ -1,3 +1,4 @@
+import type { IsoDate, TransactionType } from '@/lib/finance';
 import type { CategoryKind } from '@/types/enums';
 import type {
   Account,
@@ -8,6 +9,8 @@ import type {
   ProfileInput,
   Settings,
   SettingsPatch,
+  Transaction,
+  TransactionInput,
 } from '@/types/models';
 
 /**
@@ -52,6 +55,28 @@ export interface CategoriesRepository {
   remove(id: string): Promise<void>;
 }
 
+export type TransactionFilter = {
+  /** Desde esta fecha (inclusive). */
+  from?: IsoDate;
+  /** Hasta esta fecha (inclusive). */
+  to?: IsoDate;
+  types?: readonly TransactionType[];
+  categoryIds?: readonly string[];
+  accountId?: string;
+  /** Solo el ingreso de sueldo. */
+  onlySalary?: boolean;
+};
+
+export interface TransactionsRepository {
+  /** Movimientos activos, del más reciente al más antiguo. */
+  list(filter?: TransactionFilter): Promise<Transaction[]>;
+  getById(id: string): Promise<Transaction | null>;
+  create(input: TransactionInput): Promise<Transaction>;
+  update(id: string, patch: Partial<TransactionInput>): Promise<Transaction>;
+  /** Borrado lógico. */
+  remove(id: string): Promise<void>;
+}
+
 export interface DataRepository {
   /** Crea categorías y cuentas por defecto si la base está vacía. */
   seedDefaults(): Promise<void>;
@@ -64,5 +89,6 @@ export type Repositories = {
   settings: SettingsRepository;
   accounts: AccountsRepository;
   categories: CategoriesRepository;
+  transactions: TransactionsRepository;
   data: DataRepository;
 };

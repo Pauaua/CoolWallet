@@ -1,4 +1,15 @@
-import { buildTheme, darkColors, lightColors, resolveScheme } from '..';
+import { buildTheme, darkColors, lightColors, resolveCategoryColor, resolveScheme } from '..';
+
+describe('resolveCategoryColor', () => {
+  it('devuelve la variante del esquema', () => {
+    expect(resolveCategoryColor('forest', 'light')).toBe('#1F6F50');
+    expect(resolveCategoryColor('forest', 'dark')).toBe('#4DB587');
+  });
+
+  it('claves desconocidas usan el color neutro', () => {
+    expect(resolveCategoryColor('no-existe', 'light')).toBe(resolveCategoryColor('sage', 'light'));
+  });
+});
 
 describe('resolveScheme', () => {
   it('respeta la preferencia explícita', () => {

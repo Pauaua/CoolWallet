@@ -1,23 +1,9 @@
 import { z } from 'zod';
 
-import { formatAmountInput, formatDecimalInput, parseCLPInput, parseDecimalInput } from '@/lib/finance';
+import { amountText } from '@/features/forms/fields';
+import { formatAmountInput, formatDecimalInput, parseDecimalInput } from '@/lib/finance';
 import { CONTRACT_TERMS, CONTRACT_TYPES, HEALTH_SYSTEMS } from '@/types/enums';
 import type { Profile, ProfileInput } from '@/types/models';
-
-const MAX_AMOUNT = 1_000_000_000;
-
-/** Monto en texto ("1.200.000") → pesos enteros ≥ 0. */
-const amountText = (requiredMessage: string) =>
-  z
-    .string()
-    .transform((text) => parseCLPInput(text))
-    .pipe(
-      z
-        .number({ error: requiredMessage })
-        .int()
-        .min(0, 'El monto no puede ser negativo')
-        .max(MAX_AMOUNT, 'Revisa el monto: es demasiado alto'),
-    );
 
 export const nameSchema = z.object({
   name: z.string().trim().min(1, 'Ingresa tu nombre').max(40, 'Usa máximo 40 caracteres'),

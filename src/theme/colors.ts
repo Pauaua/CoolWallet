@@ -21,6 +21,10 @@ export type ColorTokens = {
   /** Velo detrás de modales y del drawer. */
   overlay: string;
   shadow: string;
+  /** Series del gráfico de flujo (validadas: banda de luminosidad, croma, daltonismo y contraste). */
+  chartIncome: string;
+  chartExpense: string;
+  chartDebt: string;
 };
 
 export const lightColors: ColorTokens = {
@@ -39,6 +43,9 @@ export const lightColors: ColorTokens = {
   danger: '#C4524A',
   overlay: 'rgba(22, 38, 31, 0.45)',
   shadow: '#0B1A13',
+  chartIncome: '#1A8A5A',
+  chartExpense: '#3D6BC4',
+  chartDebt: '#C2622D',
 };
 
 export const darkColors: ColorTokens = {
@@ -57,4 +64,7 @@ export const darkColors: ColorTokens = {
   danger: '#D9695F',
   overlay: 'rgba(0, 0, 0, 0.6)',
   shadow: '#000000',
+  chartIncome: '#2FA06D',
+  chartExpense: '#6A8BDB',
+  chartDebt: '#D4773F',
 };

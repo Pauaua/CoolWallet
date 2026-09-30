@@ -135,6 +135,53 @@ describe('AccountsRepository y CategoriesRepository', () => {
   });
 });
 
+describe('TransactionsRepository', () => {
+  async function seeded() {
+    const setupResult = setup();
+    await setupResult.repos.data.seedDefaults();
+    const [account] = await setupResult.repos.accounts.list();
+    const [salaryCategory] = await setupResult.repos.categories.list({ kinds: ['income'] });
+    if (!account || !salaryCategory) throw new Error('seed incompleto');
+    return { ...setupResult, account, salaryCategory };
+  }
+
+  it('crea, filtra y ordena del más reciente al más antiguo', async () => {
+    const { repos, account, salaryCategory, ctx } = await seeded();
+    const base = { accountId: account.id, categoryId: salaryCategory.id, note: null };
+    const salary = await repos.transactions.create({ ...base, type: 'income', amount: 900_000, date: '2026-09-25', isSalary: true });
+    ctx.advance(1_000);
+    const extra = await repos.transactions.create({ ...base, type: 'income', amount: 50_000, date: '2026-10-02' });
+    const adjustment = await repos.transactions.create({ ...base, type: 'adjustment', amount: -5_000, date: '2026-09-01', categoryId: null });
+
+    expect(salary.isSalary).toBe(true);
+    expect(extra.isSalary).toBe(false);
+    expect((await repos.transactions.list()).map((t) => t.id)).toEqual([extra.id, salary.id, adjustment.id]);
+    expect(await repos.transactions.list({ from: '2026-09-25', to: '2026-10-24' })).toHaveLength(2);
+    expect(await repos.transactions.list({ types: ['adjustment'] })).toEqual([adjustment]);
+    expect(await repos.transactions.list({ onlySalary: true })).toEqual([salary]);
+    expect(await repos.transactions.list({ categoryIds: [salaryCategory.id] })).toHaveLength(2);
+    expect(await repos.transactions.list({ accountId: 'otra' })).toEqual([]);
+  });
+
+  it('actualiza y elimina con borrado lógico', async () => {
+    const { repos, account } = await seeded();
+    const created = await repos.transactions.create({ type: 'income', amount: 10_000, date: '2026-09-10', accountId: account.id, categoryId: null, note: null });
+    const updated = await repos.transactions.update(created.id, { amount: 12_000, note: 'Venta' });
+    expect(updated).toMatchObject({ amount: 12_000, note: 'Venta', type: 'income' });
+    await repos.transactions.remove(created.id);
+    await expect(repos.transactions.getById(created.id)).resolves.toBeNull();
+    await expect(repos.transactions.list()).resolves.toEqual([]);
+    await expect(repos.transactions.update(created.id, { amount: 1 })).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('rechaza cuentas inexistentes (clave foránea)', async () => {
+    const { repos } = await seeded();
+    await expect(
+      repos.transactions.create({ type: 'income', amount: 1, date: '2026-09-10', accountId: 'no-existe', categoryId: null, note: null }),
+    ).rejects.toThrow();
+  });
+});
+
 describe('DataRepository', () => {
   it('siembra categorías y cuentas una sola vez', async () => {
     const { repos } = setup();

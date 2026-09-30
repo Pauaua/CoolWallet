@@ -41,7 +41,8 @@ src/
     olvide-pin.tsx      # restablecer borrando datos
     (app)/_layout.tsx   # Drawer con contenido personalizado (+ pantallas secundarias con "Volver")
     (app)/<módulo>.tsx  # gastos/ y deudas/ son carpetas con Stack propio
-    (app)/perfil.tsx, seguridad.tsx, cambiar-pin.tsx
+    (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, seguridad.tsx, cambiar-pin.tsx
+    (modals)/           # formularios modales: nuevo-ingreso, ajustar-saldo, cuenta, movimiento/[id]
   components/           # UI reutilizable (AppText, Button, TextField, AmountField, SegmentedControl, PinPad, StateViews…)
   features/<módulo>/    # hooks (TanStack Query), formularios (zod) y componentes por módulo
   lib/                  # utilidades puras
@@ -86,6 +87,12 @@ src/
 - **Acceso:** `sessionStore` (`isOnboarded`, `isLocked`) controla los `Stack.Protected` del layout raíz. "Bloquear app" → `lock()`. Bloqueo automático al volver de segundo plano tras `settings.lockTimeoutMinutes` (0 = inmediato).
 - **PIN:** 4–6 dígitos; en `expo-secure-store` se guarda solo SHA-256(sal:PIN) con sal aleatoria de 16 bytes, y el largo del PIN. Tras 5 fallos, bloqueo temporal de 30 s que se duplica (máx. 15 min). La protección real es el almacenamiento seguro del sistema + el límite de intentos.
 - **Restablecer** (`useResetApp`): `wipeAll` (borrado físico, hijos antes que padres) + PIN + fotos → seed → onboarding.
+- **Modelo de dinero (decidido con la persona):** "Dinero disponible" = suma de los saldos de las cuentas (saldo inicial + movimientos; una tarjeta con deuda resta). El sueldo se registra con un toque desde la tarjeta "¿Recibiste tu sueldo?" (monto = líquido calculado, editable) como ingreso con `transactions.is_salary = true`; se pregunta desde la fecha de pago del período hasta que se registra. Mientras falta, el sueldo esperado cuenta como ingreso de referencia (% gastado, gasto diario seguro, proyección).
+- **Resumen de Billetera:** `buildWalletSummary` (`features/wallet/walletSummary.ts`) solo combina funciones de `lib/finance` (`calcAccountBalances`, `summarizePeriodFlow`, `projectClosingBalance`…); tiene tests.
+- **Formularios modales** en `src/app/(modals)/` (ingreso extra, ajustar saldo, cuenta, movimiento/[id]); pantallas secundarias del drawer (perfil, sueldo, configuración, historial, seguridad, cambiar PIN) muestran "Volver".
+- **Gráficos:** colores de series en tokens `chartIncome/chartExpense/chartDebt` (claro y oscuro validados con el validador de paletas: banda de luminosidad, croma, daltonismo, contraste). Los colores de estado (`success/warning/danger`) no se usan como series. El flujo del mes se dibuja con barras horizontales propias (3 valores con etiqueta y monto directo); gifted-charts se usa desde la fase 5 (dona).
+- **Fechas:** `@react-native-community/datetimepicker` (incluido en Expo Go) vía `DateField`; formato en español con `src/lib/dates.ts`.
+- **UF/UTM editables** en Configuración (`settings.uf_value/utm_value`); `buildSalaryParams(settings)` los usa o cae a los valores por defecto de `params.ts`.
 - **Tema:** preferencia `system | light | dark` guardada en `settings.theme` y reflejada en `uiStore`; `AppThemeProvider` resuelve el esquema y también alimenta el tema de React Navigation.
 - **Gráficos:** react-native-gifted-charts (funciona en Expo Go; victory-native requiere Skia).
 - **Biometría:** en Expo Go funciona la huella en Android; Face ID en iOS solo en un build propio.
@@ -96,8 +103,8 @@ src/
 - [x] **Fase 2 — `src/lib/finance/`:** sueldo (AFP, salud, cesantía, impuesto único, honorarios), período financiero, flujo, gastos (anualizar, hormiga, recurrentes), deudas (cuota francesa, amortización, estado, simulador bola de nieve/avalancha), presupuestos, metas y formato. Cobertura: 100% líneas, ~98% ramas.
 - [x] **Fase 3 — Datos y acceso:** esquema de 11 tablas + migración inicial, seed, repositorios (perfil, configuración, cuentas, categorías, datos), onboarding, PIN con bloqueo por intentos, biometría, bloqueo automático, "Olvidé mi PIN", perfil con foto y pantalla de seguridad.
   - Pendiente en fase 7: en "Olvidé mi PIN", la opción **restaurar un respaldo** (requiere la importación de respaldos).
-  - Pendiente en fase 4: tema, moneda y mes financiero editables desde Inicio (ya se guardan en `settings`).
-- [ ] Fase 4 — Inicio y Billetera
+- [x] **Fase 4 — Inicio y Billetera:** resumen (líquido, gastado, disponible), desglose del sueldo, configuración (mes financiero, tema, moneda, UF/UTM), cuentas con saldo, ingresos extra, ajustes de saldo, registro del sueldo en un toque, % gastado, gasto diario promedio y seguro, proyección al cierre, flujo del mes e historial con filtros. Migración `0001` (flag de sueldo e índice por cuenta).
+  - Pendiente en fase 6: la tarjeta "Deudas" de Inicio muestra "—" y lleva al módulo hasta que existan deudas; ahí se conecta al total real.
 - [ ] Fase 5 — Gastos
 - [ ] Fase 6 — Deudas
 - [ ] Fase 7 — Extras (presupuestos, metas, calendario, reportes, CSV, respaldo)
