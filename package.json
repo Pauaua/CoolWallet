@@ -6,6 +6,7 @@
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~57.0.21",
     "@expo/vector-icons": "^15.0.2",
+    "date-fns": "^4.4.0",
     "expo": "~57.0.26",
     "expo-constants": "~57.0.20",
     "expo-font": "~57.0.4",
@@ -45,13 +46,27 @@
     "lint": "expo lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "test:coverage": "jest --coverage"
   },
   "private": true,
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|zustand)"
-    ]
+    ],
+    "collectCoverageFrom": [
+      "src/lib/**/*.ts",
+      "!src/lib/**/index.ts",
+      "!src/lib/**/__tests__/**"
+    ],
+    "coverageThreshold": {
+      "./src/lib/finance/": {
+        "branches": 95,
+        "functions": 100,
+        "lines": 98,
+        "statements": 98
+      }
+    }
   }
 }
