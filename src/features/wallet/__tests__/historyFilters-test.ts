@@ -20,7 +20,7 @@ describe('buildHistoryFilter', () => {
     expect(buildHistoryFilter({ ...base, preset: 'period', type: 'expenses', categoryId: 'coffee' })).toEqual({
       from: '2026-09-01',
       to: '2026-09-30',
-      types: ['fixed_expense', 'ant_expense'],
+      types: ['fixed_expense', 'variable_expense'],
       categoryIds: ['coffee'],
     });
   });

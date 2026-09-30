@@ -1,6 +1,6 @@
 import {
   annualizeExpense,
-  calcAntExpensesImpact,
+  calcVariableExpensesImpact,
   generateRecurringExpenses,
   toMonthlyAmount,
   type RecurringExpenseDefinition,
@@ -34,11 +34,11 @@ describe('toMonthlyAmount', () => {
   });
 });
 
-describe('calcAntExpensesImpact', () => {
+describe('calcVariableExpensesImpact', () => {
   const coffees = [{ amount: 3_000 }, { amount: 2_500 }, { amount: 4_500 }];
 
   it('total, % del ingreso y proyección anual', () => {
-    expect(calcAntExpensesImpact(coffees, 1_000_000)).toEqual({
+    expect(calcVariableExpensesImpact(coffees, 1_000_000)).toEqual({
       total: 10_000,
       percentageOfIncome: 1,
       projectedMonthly: 10_000,
@@ -47,20 +47,20 @@ describe('calcAntExpensesImpact', () => {
   });
 
   it('proyecta el mes completo si se indica el avance', () => {
-    expect(calcAntExpensesImpact(coffees, 1_000_000, { daysElapsed: 10, daysInPeriod: 30 })).toMatchObject({
+    expect(calcVariableExpensesImpact(coffees, 1_000_000, { daysElapsed: 10, daysInPeriod: 30 })).toMatchObject({
       projectedMonthly: 30_000,
       projectedAnnual: 360_000,
     });
   });
 
   it('no proyecta si el período terminó o no ha empezado', () => {
-    expect(calcAntExpensesImpact(coffees, 0, { daysElapsed: 30, daysInPeriod: 30 }).projectedMonthly).toBe(10_000);
-    expect(calcAntExpensesImpact(coffees, 0, { daysElapsed: 0, daysInPeriod: 30 }).projectedMonthly).toBe(10_000);
+    expect(calcVariableExpensesImpact(coffees, 0, { daysElapsed: 30, daysInPeriod: 30 }).projectedMonthly).toBe(10_000);
+    expect(calcVariableExpensesImpact(coffees, 0, { daysElapsed: 0, daysInPeriod: 30 }).projectedMonthly).toBe(10_000);
   });
 
   it('sin ingreso el % es null; sin gastos todo es 0', () => {
-    expect(calcAntExpensesImpact(coffees, 0).percentageOfIncome).toBeNull();
-    expect(calcAntExpensesImpact([], 500_000)).toEqual({ total: 0, percentageOfIncome: 0, projectedMonthly: 0, projectedAnnual: 0 });
+    expect(calcVariableExpensesImpact(coffees, 0).percentageOfIncome).toBeNull();
+    expect(calcVariableExpensesImpact([], 500_000)).toEqual({ total: 0, percentageOfIncome: 0, projectedMonthly: 0, projectedAnnual: 0 });
   });
 });
 

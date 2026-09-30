@@ -8,6 +8,7 @@ export { ColorIcon } from './ColorIcon';
 export { DateField } from './DateField';
 export { Divider } from './Divider';
 export { EmptyState } from './EmptyState';
+export { Fab } from './Fab';
 export { FormScreen } from './FormScreen';
 export { Icon, type IconName } from './Icon';
 export { IconButton } from './IconButton';

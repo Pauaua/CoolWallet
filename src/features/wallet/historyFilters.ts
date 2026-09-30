@@ -22,7 +22,7 @@ export const HISTORY_TYPE_OPTIONS: readonly { value: HistoryTypeFilter; label: s
 const TYPES_BY_FILTER: Record<HistoryTypeFilter, readonly TransactionType[] | undefined> = {
   all: undefined,
   income: ['income'],
-  expenses: ['fixed_expense', 'ant_expense'],
+  expenses: ['fixed_expense', 'variable_expense'],
   debts: ['debt_payment'],
   adjustments: ['adjustment'],
 };

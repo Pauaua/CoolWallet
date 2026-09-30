@@ -14,6 +14,7 @@ const SECONDARY_SCREENS = [
   { name: 'sueldo', title: 'Sueldo líquido' },
   { name: 'configuracion', title: 'Configuración' },
   { name: 'historial', title: 'Historial' },
+  { name: 'categorias', title: 'Categorías' },
   { name: 'seguridad', title: 'Seguridad' },
   { name: 'cambiar-pin', title: 'Cambiar PIN' },
 ] as const;
@@ -46,7 +47,18 @@ export default function AppLayout() {
       })}
     >
       {APP_MODULES.map((module) => (
-        <Drawer.Screen key={module.route} name={module.route} options={{ title: module.title }} />
+        <Drawer.Screen
+          key={module.route}
+          name={module.route}
+          options={{
+            title: module.title,
+            headerRight:
+              module.route === 'gastos'
+                ? () => <IconButton icon="tag" accessibilityLabel="Categorías" onPress={() => router.push('/categorias')} />
+                : undefined,
+            headerRightContainerStyle: { paddingRight: spacing.xs },
+          }}
+        />
       ))}
       {SECONDARY_SCREENS.map((screen) => (
         <Drawer.Screen

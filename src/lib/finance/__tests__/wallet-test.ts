@@ -4,6 +4,7 @@ import {
   calcAccountBalance,
   calcAccountBalances,
   calcAdjustmentAmount,
+  calcFreeToSpend,
   calcPeriodIncomeBase,
   getSalaryDate,
   isSalaryPending,
@@ -25,13 +26,13 @@ describe('signedAmount', () => {
     expect(signedAmount(tx('income', 100))).toBe(100);
     expect(signedAmount(tx('adjustment', -30))).toBe(-30);
     expect(signedAmount(tx('fixed_expense', 50))).toBe(-50);
-    expect(signedAmount(tx('ant_expense', 5))).toBe(-5);
+    expect(signedAmount(tx('variable_expense', 5))).toBe(-5);
     expect(signedAmount(tx('debt_payment', 20))).toBe(-20);
   });
 });
 
 describe('calcAccountBalance / calcAccountBalances', () => {
-  const movements = [tx('income', 1_000_000), tx('ant_expense', 3_000), tx('debt_payment', 50_000), tx('adjustment', -7_000), tx('ant_expense', 2_000, 'cash')];
+  const movements = [tx('income', 1_000_000), tx('variable_expense', 3_000), tx('debt_payment', 50_000), tx('adjustment', -7_000), tx('variable_expense', 2_000, 'cash')];
 
   it('saldo inicial + movimientos', () => {
     expect(calcAccountBalance(100_000, movements.slice(0, 4))).toBe(1_040_000);
@@ -64,7 +65,7 @@ describe('calcAdjustmentAmount', () => {
 
 describe('summarizePeriodFlow', () => {
   it('separa ingresos, gastos, deudas y ajustes', () => {
-    expect(summarizePeriodFlow([tx('income', 1_000_000), tx('fixed_expense', 300_000), tx('ant_expense', 20_000), tx('debt_payment', 80_000), tx('adjustment', 5_000)])).toEqual({
+    expect(summarizePeriodFlow([tx('income', 1_000_000), tx('fixed_expense', 300_000), tx('variable_expense', 20_000), tx('debt_payment', 80_000), tx('adjustment', 5_000)])).toEqual({
       income: 1_000_000,
       expenses: 320_000,
       debtPayments: 80_000,
@@ -103,24 +104,31 @@ describe('sueldo del período', () => {
 });
 
 describe('projectClosingBalance', () => {
-  it('descuenta el ritmo de gasto de los días que faltan', () => {
+  it('descuenta el ritmo de gasto variable de los días que faltan', () => {
     // Promedio 10.000/día, faltan 20 días después de hoy.
-    expect(projectClosingBalance(500_000, 0, 100_000, 10, 30)).toBe(300_000);
+    expect(projectClosingBalance(500_000, 0, 0, 100_000, 10, 30)).toBe(300_000);
   });
 
-  it('suma los ingresos pendientes', () => {
-    expect(projectClosingBalance(100_000, 900_000, 0, 1, 30)).toBe(1_000_000);
+  it('suma ingresos pendientes y resta compromisos pendientes', () => {
+    expect(projectClosingBalance(100_000, 900_000, 450_000, 0, 1, 30)).toBe(550_000);
   });
 
   it('el último día no proyecta más gasto', () => {
-    expect(projectClosingBalance(50_000, 0, 300_000, 30, 30)).toBe(50_000);
+    expect(projectClosingBalance(50_000, 0, 0, 300_000, 30, 30)).toBe(50_000);
   });
 
   it('sin días transcurridos no hay ritmo que proyectar', () => {
-    expect(projectClosingBalance(50_000, 0, 0, 0, 30)).toBe(50_000);
+    expect(projectClosingBalance(50_000, 0, 0, 0, 0, 30)).toBe(50_000);
   });
 
   it('puede proyectar saldo negativo', () => {
-    expect(projectClosingBalance(10_000, 0, 60_000, 3, 30)).toBe(-530_000);
+    expect(projectClosingBalance(10_000, 0, 0, 60_000, 3, 30)).toBe(-530_000);
+  });
+});
+
+describe('calcFreeToSpend', () => {
+  it('disponible + ingresos pendientes − compromisos', () => {
+    expect(calcFreeToSpend(300_000, 900_000, 450_000)).toBe(750_000);
+    expect(calcFreeToSpend(10_000, 0, 50_000)).toBe(-40_000);
   });
 });

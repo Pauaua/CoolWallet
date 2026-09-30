@@ -78,15 +78,20 @@ export default function WalletScreen() {
       </Card>
 
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <StatCard icon="sun" label="Puedes gastar por día" value={formatCLP(summary.safeDailySpend)} caption={`Durante ${summary.daysRemaining} ${summary.daysRemaining === 1 ? 'día' : 'días'} más`} />
-        <StatCard icon="activity" label="Promedio diario" value={formatCLP(summary.dailyAverage)} caption={`En ${summary.daysElapsed} ${summary.daysElapsed === 1 ? 'día' : 'días'}`} />
+        <StatCard
+          icon="sun"
+          label="Puedes gastar por día"
+          value={formatCLP(summary.safeDailySpend)}
+          caption={`Por ${summary.daysRemaining} ${summary.daysRemaining === 1 ? 'día' : 'días'}${summary.pendingFixedExpenses > 0 ? `, ya descontando ${formatCLP(summary.pendingFixedExpenses)} en fijos por pagar` : ''}`}
+        />
+        <StatCard icon="activity" label="Promedio diario" value={formatCLP(summary.dailyAverage)} caption={`Gasto variable en ${summary.daysElapsed} ${summary.daysElapsed === 1 ? 'día' : 'días'}`} />
       </View>
       <StatCard
         icon="trending-up"
         label="Proyección al cierre del mes"
         value={formatCLP(summary.projectedClosingBalance)}
         valueColor={summary.projectedClosingBalance < 0 ? 'danger' : 'text'}
-        caption={summary.projectedClosingBalance < 0 ? 'A este ritmo terminarías el mes en negativo.' : 'Lo que te quedaría si sigues gastando a este ritmo.'}
+        caption={summary.projectedClosingBalance < 0 ? 'A este ritmo terminarías el mes en negativo.' : 'Lo que te quedaría tras pagar tus fijos, si sigues gastando a este ritmo.'}
       />
 
       <SectionHeader title="Flujo del mes" />

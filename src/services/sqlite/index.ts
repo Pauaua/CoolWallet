@@ -4,6 +4,7 @@ import type { Repositories } from '../types';
 import { createAccountsRepository } from './accountsRepository';
 import { createCategoriesRepository } from './categoriesRepository';
 import { createDataRepository } from './dataRepository';
+import { createFixedExpensesRepository } from './fixedExpensesRepository';
 import { createProfileRepository } from './profileRepository';
 import { createSettingsRepository } from './settingsRepository';
 import { createTransactionsRepository } from './transactionsRepository';
@@ -16,6 +17,7 @@ export function createSqliteRepositories(ctx: RepositoryContext): Repositories {
     accounts: createAccountsRepository(ctx),
     categories: createCategoriesRepository(ctx),
     transactions: createTransactionsRepository(ctx),
+    fixedExpenses: createFixedExpensesRepository(ctx),
     data: createDataRepository(ctx),
   };
 }

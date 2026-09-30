@@ -13,13 +13,13 @@ export const DEFAULT_CATEGORIES: readonly SeedCategory[] = [
   { name: 'Salud y seguros', icon: 'heart', color: 'rose', kind: 'fixed', budgetGroup: 'needs' },
   { name: 'Transporte', icon: 'truck', color: 'slate', kind: 'general', budgetGroup: 'needs' },
   { name: 'Supermercado', icon: 'shopping-cart', color: 'emerald', kind: 'general', budgetGroup: 'needs' },
-  // Gastos hormiga
-  { name: 'Café', icon: 'coffee', color: 'clay', kind: 'ant', budgetGroup: 'wants' },
-  { name: 'Snacks', icon: 'shopping-bag', color: 'amber', kind: 'ant', budgetGroup: 'wants' },
-  { name: 'Delivery', icon: 'package', color: 'rose', kind: 'ant', budgetGroup: 'wants' },
-  { name: 'Apps y juegos', icon: 'smartphone', color: 'plum', kind: 'ant', budgetGroup: 'wants' },
-  { name: 'Transporte ocasional', icon: 'navigation', color: 'sky', kind: 'ant', budgetGroup: 'wants' },
-  { name: 'Salidas', icon: 'film', color: 'mint', kind: 'ant', budgetGroup: 'wants' },
+  // Gastos variables
+  { name: 'Café', icon: 'coffee', color: 'clay', kind: 'variable', budgetGroup: 'wants' },
+  { name: 'Snacks', icon: 'shopping-bag', color: 'amber', kind: 'variable', budgetGroup: 'wants' },
+  { name: 'Delivery', icon: 'package', color: 'rose', kind: 'variable', budgetGroup: 'wants' },
+  { name: 'Apps y juegos', icon: 'smartphone', color: 'plum', kind: 'variable', budgetGroup: 'wants' },
+  { name: 'Transporte ocasional', icon: 'navigation', color: 'sky', kind: 'variable', budgetGroup: 'wants' },
+  { name: 'Salidas', icon: 'film', color: 'mint', kind: 'variable', budgetGroup: 'wants' },
   { name: 'Otros', icon: 'more-horizontal', color: 'sage', kind: 'general', budgetGroup: 'wants' },
   // Ingresos
   { name: 'Sueldo', icon: 'briefcase', color: 'forest', kind: 'income', budgetGroup: null },

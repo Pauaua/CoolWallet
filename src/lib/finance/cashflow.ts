@@ -32,7 +32,7 @@ export function filterByPeriod<T extends Pick<FinanceTransaction, 'date'>>(
   return transactions.filter((tx) => isDateInPeriod(tx.date, period));
 }
 
-/** Total gastado en el período (gastos fijos + hormiga; no incluye pagos de deuda). */
+/** Total gastado en el período (gastos fijos + variables; no incluye pagos de deuda). */
 export function calcMonthlySpent(transactions: readonly FinanceTransaction[], period: FinancialPeriod): number {
   return filterByPeriod(transactions, period).reduce(
     (total, tx) => (EXPENSE_TYPES.includes(tx.type) ? total + tx.amount : total),

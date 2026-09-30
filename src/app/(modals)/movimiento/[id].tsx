@@ -11,7 +11,7 @@ import type { CategoryKind } from '@/types/enums';
 const CATEGORY_KINDS_BY_TYPE: Record<TransactionType, readonly CategoryKind[] | null> = {
   income: ['income'],
   fixed_expense: ['fixed', 'general'],
-  ant_expense: ['ant', 'general'],
+  variable_expense: ['variable', 'general'],
   debt_payment: null,
   adjustment: null,
 };

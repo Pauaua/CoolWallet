@@ -20,16 +20,16 @@ const september: FinancialPeriod = { start: '2026-09-01', end: '2026-09-30', day
 const transactions: FinanceTransaction[] = [
   { type: 'income', amount: 1_000_000, date: '2026-09-01', categoryId: null },
   { type: 'fixed_expense', amount: 300_000, date: '2026-09-05', categoryId: 'rent' },
-  { type: 'ant_expense', amount: 2_500, date: '2026-09-10', categoryId: 'coffee' },
-  { type: 'ant_expense', amount: 3_500, date: '2026-09-30T22:00:00.000Z', categoryId: 'coffee' },
-  { type: 'ant_expense', amount: 9_000, date: '2026-10-01', categoryId: 'coffee' },
+  { type: 'variable_expense', amount: 2_500, date: '2026-09-10', categoryId: 'coffee' },
+  { type: 'variable_expense', amount: 3_500, date: '2026-09-30T22:00:00.000Z', categoryId: 'coffee' },
+  { type: 'variable_expense', amount: 9_000, date: '2026-10-01', categoryId: 'coffee' },
   { type: 'debt_payment', amount: 50_000, date: '2026-09-15', categoryId: null },
   { type: 'adjustment', amount: -10_000, date: '2026-09-20', categoryId: null },
 ];
 
 describe('sumByType', () => {
   it('suma solo el tipo pedido', () => {
-    expect(sumByType(transactions, 'ant_expense')).toBe(15_000);
+    expect(sumByType(transactions, 'variable_expense')).toBe(15_000);
     expect(sumByType(transactions, 'adjustment')).toBe(-10_000);
   });
 
@@ -59,7 +59,7 @@ describe('filterByPeriod', () => {
 });
 
 describe('calcMonthlySpent', () => {
-  it('suma gastos fijos y hormiga del período, sin deudas ni ajustes', () => {
+  it('suma gastos fijos y variables del período, sin deudas ni ajustes', () => {
     expect(calcMonthlySpent(transactions, september)).toBe(306_000);
   });
 

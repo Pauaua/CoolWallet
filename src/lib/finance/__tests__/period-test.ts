@@ -1,5 +1,6 @@
 import {
   clampDayToMonth,
+  daysUntil,
   getDaysElapsed,
   getDaysRemaining,
   getFinancialPeriod,
@@ -107,5 +108,13 @@ describe('getDaysElapsed / getDaysRemaining', () => {
     expect(getDaysRemaining(period, '2026-08-01')).toBe(30);
     expect(getDaysElapsed(period, '2026-10-05')).toBe(30);
     expect(getDaysRemaining(period, '2026-10-01')).toBe(0);
+  });
+});
+
+describe('daysUntil', () => {
+  it('cuenta días de calendario con signo', () => {
+    expect(daysUntil('2026-10-02', '2026-09-30')).toBe(2);
+    expect(daysUntil('2026-09-30', '2026-09-30')).toBe(0);
+    expect(daysUntil('2026-09-28', new Date(2026, 8, 30, 23, 0))).toBe(-2);
   });
 });

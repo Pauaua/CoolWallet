@@ -41,8 +41,8 @@ src/
     olvide-pin.tsx      # restablecer borrando datos
     (app)/_layout.tsx   # Drawer con contenido personalizado (+ pantallas secundarias con "Volver")
     (app)/<módulo>.tsx  # gastos/ y deudas/ son carpetas con Stack propio
-    (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, seguridad.tsx, cambiar-pin.tsx
-    (modals)/           # formularios modales: nuevo-ingreso, ajustar-saldo, cuenta, movimiento/[id]
+    (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, categorias.tsx, seguridad.tsx, cambiar-pin.tsx
+    (modals)/           # formularios modales: nuevo-ingreso, ajustar-saldo, cuenta, movimiento/[id], gasto-rapido, gasto-fijo, categoria
   components/           # UI reutilizable (AppText, Button, TextField, AmountField, SegmentedControl, PinPad, StateViews…)
   features/<módulo>/    # hooks (TanStack Query), formularios (zod) y componentes por módulo
   lib/                  # utilidades puras
@@ -78,7 +78,7 @@ src/
 - **Porcentajes** se devuelven sin redondear, y `null` cuando no son calculables (ej.: sin ingreso); se muestran con `formatPercent`.
 - **Fechas de calendario** (`IsoDate` = `yyyy-MM-dd`, hora local) para movimientos, vencimientos y metas; los timestamps (`created_at`…) van en ISO completo. `parseIsoDate` ignora la hora para evitar corrimientos de zona horaria.
 - **Parámetros legales** (UF, UTM, topes, tramos, AFP, salud, cesantía, honorarios) en `src/lib/finance/params.ts`, aproximados y con fecha de referencia: toda pantalla que los use muestra `PARAMS_DISCLAIMER`. `IndicatorsSource` es el punto para actualizar UF/UTM desde una API en el futuro (hoy solo fuente estática, sin red).
-- **Valores de enums en inglés:** movimientos `income | fixed_expense | ant_expense | debt_payment | adjustment` (solo `adjustment` lleva signo); deudas `pending | installment | variable`; estado de deuda `paid | on_time | due_soon | overdue`.
+- **Valores de enums en inglés:** movimientos `income | fixed_expense | variable_expense | debt_payment | adjustment` (solo `adjustment` lleva signo); deudas `pending | installment | variable`; estado de deuda `paid | on_time | due_soon | overdue`.
 - **Período financiero:** `getFinancialPeriod(fecha, díaPago, 'calendar' | 'payday')`; `getDaysElapsed`/`getDaysRemaining` cuentan el día de hoy.
 - **Repositorios:** interfaces en `src/services/types.ts`; implementación SQLite en `src/services/sqlite/` tipada contra `AppDatabase` (`BaseSQLiteDatabase<'sync'>`), así la app usa expo-sqlite y los tests better-sqlite3 en memoria **con las mismas migraciones**. Dentro de `db.transaction` usar solo métodos síncronos (`.run()`, `.all()`, `.get()`). Contexto inyectable (`newId`, `now`).
 - **Filas únicas:** `profile` y `settings` tienen una sola fila activa; `settings.get()` la crea con valores por defecto si falta.
@@ -88,9 +88,11 @@ src/
 - **PIN:** 4–6 dígitos; en `expo-secure-store` se guarda solo SHA-256(sal:PIN) con sal aleatoria de 16 bytes, y el largo del PIN. Tras 5 fallos, bloqueo temporal de 30 s que se duplica (máx. 15 min). La protección real es el almacenamiento seguro del sistema + el límite de intentos.
 - **Restablecer** (`useResetApp`): `wipeAll` (borrado físico, hijos antes que padres) + PIN + fotos → seed → onboarding.
 - **Modelo de dinero (decidido con la persona):** "Dinero disponible" = suma de los saldos de las cuentas (saldo inicial + movimientos; una tarjeta con deuda resta). El sueldo se registra con un toque desde la tarjeta "¿Recibiste tu sueldo?" (monto = líquido calculado, editable) como ingreso con `transactions.is_salary = true`; se pregunta desde la fecha de pago del período hasta que se registra. Mientras falta, el sueldo esperado cuenta como ingreso de referencia (% gastado, gasto diario seguro, proyección).
+- **Gastos fijos y variables (decidido con la persona):** lo que el enunciado llamaba "gasto hormiga" se llama **gasto variable** (`variable_expense`, categorías `kind = 'variable'`); la migración `0002` convierte datos antiguos. Los gastos fijos generan vencimientos por período en `fixed_expense_occurrences` (`usePeriodOccurrences` sincroniza de forma idempotente); marcar pagado crea el movimiento en una transacción de BD, y eliminar ese movimiento deja el vencimiento pendiente.
+- **Ritmo de gasto:** el promedio diario, el gasto diario seguro y la proyección usan solo **gastos variables**; los fijos por pagar se descuentan como compromiso conocido (`calcFreeToSpend`, `projectClosingBalance`).
 - **Resumen de Billetera:** `buildWalletSummary` (`features/wallet/walletSummary.ts`) solo combina funciones de `lib/finance` (`calcAccountBalances`, `summarizePeriodFlow`, `projectClosingBalance`…); tiene tests.
 - **Formularios modales** en `src/app/(modals)/` (ingreso extra, ajustar saldo, cuenta, movimiento/[id]); pantallas secundarias del drawer (perfil, sueldo, configuración, historial, seguridad, cambiar PIN) muestran "Volver".
-- **Gráficos:** colores de series en tokens `chartIncome/chartExpense/chartDebt` (claro y oscuro validados con el validador de paletas: banda de luminosidad, croma, daltonismo, contraste). Los colores de estado (`success/warning/danger`) no se usan como series. El flujo del mes se dibuja con barras horizontales propias (3 valores con etiqueta y monto directo); gifted-charts se usa desde la fase 5 (dona).
+- **Gráficos:** colores de series en tokens `chartIncome/chartExpense/chartDebt` (claro y oscuro validados con el validador de paletas: banda de luminosidad, croma, daltonismo, contraste). Los colores de estado (`success/warning/danger`) no se usan como series. El flujo del mes se dibuja con barras horizontales propias (3 valores con etiqueta y monto directo); la dona por categoría usa react-native-gifted-charts (máx. 6 porciones, resto en "Otras", separación de 2px y leyenda con ícono, nombre, monto y %). La paleta de categorías (`src/theme/categoryColors.ts`) pasa luminosidad y croma en ambos modos; como la persona elige colores, los gráficos nunca dependen solo del color.
 - **Fechas:** `@react-native-community/datetimepicker` (incluido en Expo Go) vía `DateField`; formato en español con `src/lib/dates.ts`.
 - **UF/UTM editables** en Configuración (`settings.uf_value/utm_value`); `buildSalaryParams(settings)` los usa o cae a los valores por defecto de `params.ts`.
 - **Tema:** preferencia `system | light | dark` guardada en `settings.theme` y reflejada en `uiStore`; `AppThemeProvider` resuelve el esquema y también alimenta el tema de React Navigation.
@@ -105,7 +107,7 @@ src/
   - Pendiente en fase 7: en "Olvidé mi PIN", la opción **restaurar un respaldo** (requiere la importación de respaldos).
 - [x] **Fase 4 — Inicio y Billetera:** resumen (líquido, gastado, disponible), desglose del sueldo, configuración (mes financiero, tema, moneda, UF/UTM), cuentas con saldo, ingresos extra, ajustes de saldo, registro del sueldo en un toque, % gastado, gasto diario promedio y seguro, proyección al cierre, flujo del mes e historial con filtros. Migración `0001` (flag de sueldo e índice por cuenta).
   - Pendiente en fase 6: la tarjeta "Deudas" de Inicio muestra "—" y lleva al módulo hasta que existan deudas; ahí se conecta al total real.
-- [ ] Fase 5 — Gastos
+- [x] **Fase 5 — Gastos:** gastos fijos (vencimientos por período, marcar pagado/pendiente, próximo vencimiento, pausar), gastos variables con registro rápido (montos frecuentes + categoría en 2 toques), total, % del ingreso, costo anual, top 3, dona por categoría y comparación con el mes anterior; gestión de categorías (ícono, color, grupo 50/30/20). Migración `0002` (hormiga → variable).
 - [ ] Fase 6 — Deudas
 - [ ] Fase 7 — Extras (presupuestos, metas, calendario, reportes, CSV, respaldo)
 - [ ] Fase 8 — Pulido y README

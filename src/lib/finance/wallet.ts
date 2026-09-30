@@ -58,7 +58,7 @@ export type PeriodFlow = {
 /** Resumen del flujo de un conjunto de movimientos (normalmente, los del período). */
 export function summarizePeriodFlow(transactions: readonly FinanceTransaction[]): PeriodFlow {
   const income = sumByType(transactions, 'income');
-  const expenses = sumByType(transactions, 'fixed_expense') + sumByType(transactions, 'ant_expense');
+  const expenses = sumByType(transactions, 'fixed_expense') + sumByType(transactions, 'variable_expense');
   const debtPayments = sumByType(transactions, 'debt_payment');
   const adjustments = sumByType(transactions, 'adjustment');
   return { income, expenses, debtPayments, adjustments, net: roundMoney(income - expenses - debtPayments + adjustments) };
@@ -89,16 +89,27 @@ export function calcPeriodIncomeBase(registeredIncome: number, expectedSalary: n
 }
 
 /**
- * Saldo proyectado al cierre del período si se mantiene el ritmo de gasto:
- * disponible + ingresos pendientes − (promedio diario × días que faltan después de hoy).
+ * Saldo proyectado al cierre del período:
+ * disponible + ingresos pendientes − compromisos pendientes (gastos fijos por pagar)
+ * − (promedio diario de gasto variable × días que faltan después de hoy).
+ * El ritmo usa solo gasto variable: los fijos son montos conocidos, no un ritmo.
  */
 export function projectClosingBalance(
   available: number,
   pendingIncome: number,
-  spent: number,
+  pendingCommitments: number,
+  variableSpent: number,
   daysElapsed: number,
   daysInPeriod: number,
 ): number {
   const futureDays = Math.max(0, daysInPeriod - Math.max(0, daysElapsed));
-  return roundMoney(available + pendingIncome - calcDailyAverage(spent, daysElapsed) * futureDays);
+  return roundMoney(available + pendingIncome - pendingCommitments - calcDailyAverage(variableSpent, daysElapsed) * futureDays);
+}
+
+/**
+ * Cuánto queda para gastar libremente en el período: disponible + ingresos
+ * pendientes − compromisos pendientes. Base del "puedes gastar por día".
+ */
+export function calcFreeToSpend(available: number, pendingIncome: number, pendingCommitments: number): number {
+  return roundMoney(available + pendingIncome - pendingCommitments);
 }

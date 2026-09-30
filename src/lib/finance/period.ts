@@ -95,3 +95,8 @@ export function getDaysRemaining(period: FinancialPeriod, today: IsoDate | Date)
   const remaining = differenceInCalendarDays(parseIsoDate(period.end), parseIsoDate(today)) + 1;
   return Math.min(Math.max(0, remaining), period.daysInPeriod);
 }
+
+/** Días de calendario desde `today` hasta `date` (negativo si ya pasó). */
+export function daysUntil(date: IsoDate | Date, today: IsoDate | Date): number {
+  return differenceInCalendarDays(parseIsoDate(date), parseIsoDate(today));
+}

@@ -23,7 +23,7 @@ export type AppModule = {
 export const APP_MODULES: readonly AppModule[] = [
   { route: 'index', title: 'Inicio', icon: 'home', summary: 'Tu perfil, sueldo, configuración y un resumen rápido de tus finanzas.' },
   { route: 'billetera', title: 'Billetera', icon: 'credit-card', summary: 'Tu dinero disponible, cuentas, movimientos y proyección a fin de mes.' },
-  { route: 'gastos', title: 'Gastos', icon: 'shopping-bag', summary: 'Gastos fijos del mes y registro rápido de gastos hormiga.' },
+  { route: 'gastos', title: 'Gastos', icon: 'shopping-bag', summary: 'Gastos fijos del mes y registro rápido de gastos variables.' },
   { route: 'deudas', title: 'Deudas', icon: 'file-text', summary: 'Deudas pendientes, en cuotas y variables, con abonos y simulador de pago.' },
   { route: 'presupuestos', title: 'Presupuestos', icon: 'pie-chart', summary: 'Límites mensuales por categoría con alertas al 80% y 100%.' },
   { route: 'metas', title: 'Metas de ahorro', icon: 'target', summary: 'Define metas y descubre cuánto ahorrar cada mes para lograrlas.' },

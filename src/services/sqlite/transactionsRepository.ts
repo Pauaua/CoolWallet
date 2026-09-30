@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, inArray, isNull, lte, type SQL } from 'drizzle-orm';
 
-import { transactions } from '@/db/schema';
+import { fixedExpenseOccurrences, transactions } from '@/db/schema';
 
 import { NotFoundError, newRowFields, type RepositoryContext } from '../context';
 import type { TransactionFilter, TransactionsRepository } from '../types';
@@ -55,7 +55,14 @@ export function createTransactionsRepository(ctx: RepositoryContext): Transactio
 
     async remove(id) {
       const timestamp = ctx.now();
-      db.update(transactions).set({ deletedAt: timestamp, updatedAt: timestamp }).where(active(id)).run();
+      db.transaction((tx) => {
+        tx.update(transactions).set({ deletedAt: timestamp, updatedAt: timestamp }).where(active(id)).run();
+        // Si era el pago de un gasto fijo, ese vencimiento vuelve a quedar pendiente.
+        tx.update(fixedExpenseOccurrences)
+          .set({ status: 'pending', transactionId: null, paidAt: null, updatedAt: timestamp })
+          .where(eq(fixedExpenseOccurrences.transactionId, id))
+          .run();
+      });
     },
   };
 }

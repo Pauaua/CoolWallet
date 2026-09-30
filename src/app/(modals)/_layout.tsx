@@ -21,6 +21,9 @@ export default function ModalsLayout() {
       <Stack.Screen name="ajustar-saldo" options={{ title: 'Ajustar saldo' }} />
       <Stack.Screen name="cuenta" options={{ title: 'Cuenta' }} />
       <Stack.Screen name="movimiento/[id]" options={{ title: 'Movimiento' }} />
+      <Stack.Screen name="gasto-rapido" options={{ title: 'Gasto variable' }} />
+      <Stack.Screen name="gasto-fijo" options={{ title: 'Gasto fijo' }} />
+      <Stack.Screen name="categoria" options={{ title: 'Categoría' }} />
     </Stack>
   );
 }

@@ -4,7 +4,7 @@ import type { ContractTerm, ContractType, DebtKind, HealthSystem, PeriodMode, Re
  * Valores permitidos de las columnas tipo "enum" de la base de datos.
  * Los que también usa `lib/finance` se validan contra sus tipos con `satisfies`.
  */
-export const TRANSACTION_TYPES = ['income', 'fixed_expense', 'ant_expense', 'debt_payment', 'adjustment'] as const satisfies readonly TransactionType[];
+export const TRANSACTION_TYPES = ['income', 'fixed_expense', 'variable_expense', 'debt_payment', 'adjustment'] as const satisfies readonly TransactionType[];
 export const DEBT_KINDS = ['pending', 'installment', 'variable'] as const satisfies readonly DebtKind[];
 export const RECURRING_FREQUENCIES = ['monthly', 'bimonthly', 'annual'] as const satisfies readonly RecurringFrequency[];
 export const CONTRACT_TYPES = ['dependiente', 'honorarios'] as const satisfies readonly ContractType[];
@@ -15,8 +15,8 @@ export const PERIOD_MODES = ['calendar', 'payday'] as const satisfies readonly P
 export const ACCOUNT_TYPES = ['checking', 'cash', 'credit_card', 'savings'] as const;
 export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
-/** Uso de una categoría: gasto fijo, gasto hormiga, ingreso o general (ambos tipos de gasto). */
-export const CATEGORY_KINDS = ['fixed', 'ant', 'income', 'general'] as const;
+/** Uso de una categoría: gasto fijo, gasto variable, ingreso o general (ambos tipos de gasto). */
+export const CATEGORY_KINDS = ['fixed', 'variable', 'income', 'general'] as const;
 export type CategoryKind = (typeof CATEGORY_KINDS)[number];
 
 /** Grupo de la regla 50/30/20. */

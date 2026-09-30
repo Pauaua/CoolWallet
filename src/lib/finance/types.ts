@@ -3,11 +3,11 @@ import type { IsoDate } from './period';
 /**
  * Tipos de movimiento.
  * - `income`: ingreso (sueldo, ingreso extra).
- * - `fixed_expense` / `ant_expense`: gasto fijo / gasto hormiga.
+ * - `fixed_expense` / `variable_expense`: gasto fijo / gasto variable.
  * - `debt_payment`: abono o pago de deuda.
  * - `adjustment`: corrección de saldo (el único con monto con signo).
  */
-export type TransactionType = 'income' | 'fixed_expense' | 'ant_expense' | 'debt_payment' | 'adjustment';
+export type TransactionType = 'income' | 'fixed_expense' | 'variable_expense' | 'debt_payment' | 'adjustment';
 
 /** Datos mínimos de un movimiento que necesitan los cálculos. */
 export type FinanceTransaction = {
@@ -20,4 +20,4 @@ export type FinanceTransaction = {
 };
 
 /** Tipos que cuentan como gasto. */
-export const EXPENSE_TYPES: readonly TransactionType[] = ['fixed_expense', 'ant_expense'];
+export const EXPENSE_TYPES: readonly TransactionType[] = ['fixed_expense', 'variable_expense'];

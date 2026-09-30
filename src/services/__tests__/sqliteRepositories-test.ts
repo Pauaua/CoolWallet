@@ -105,9 +105,9 @@ describe('AccountsRepository y CategoriesRepository', () => {
   it('filtra categorías por tipo y excluye las eliminadas', async () => {
     const { repos } = setup();
     await repos.data.seedDefaults();
-    const ant = await repos.categories.list({ kinds: ['ant'] });
+    const ant = await repos.categories.list({ kinds: ['variable'] });
     expect(ant.length).toBeGreaterThan(0);
-    expect(ant.every((category) => category.kind === 'ant')).toBe(true);
+    expect(ant.every((category) => category.kind === 'variable')).toBe(true);
 
     const coffee = ant.find((category) => category.name === 'Café');
     expect(coffee).toBeDefined();

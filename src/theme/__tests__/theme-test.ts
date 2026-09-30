@@ -2,8 +2,8 @@ import { buildTheme, darkColors, lightColors, resolveCategoryColor, resolveSchem
 
 describe('resolveCategoryColor', () => {
   it('devuelve la variante del esquema', () => {
-    expect(resolveCategoryColor('forest', 'light')).toBe('#1F6F50');
-    expect(resolveCategoryColor('forest', 'dark')).toBe('#4DB587');
+    expect(resolveCategoryColor('forest', 'light')).toBe('#1B7A50');
+    expect(resolveCategoryColor('forest', 'dark')).toBe('#3FA877');
   });
 
   it('claves desconocidas usan el color neutro', () => {

@@ -1,6 +1,7 @@
 import {
   calcAccountBalances,
   calcDailyAverage,
+  calcFreeToSpend,
   calcPeriodIncomeBase,
   calcSafeDailySpend,
   calcSpendingPercentage,
@@ -13,6 +14,7 @@ import {
   projectClosingBalance,
   summarizePeriodFlow,
   sumAmounts,
+  sumByType,
   type FinancialPeriod,
   type IsoDate,
   type PeriodFlow,
@@ -28,6 +30,8 @@ export type WalletSummaryInput = {
   periodMode: PeriodMode;
   /** Sueldo líquido calculado del perfil. */
   expectedSalary: number;
+  /** Monto de los gastos fijos del período aún sin pagar. */
+  pendingFixedExpenses: number;
   today: IsoDate | Date;
 };
 
@@ -48,10 +52,17 @@ export type WalletSummary = {
   pendingIncome: number;
   /** Ingreso de referencia del período (registrado + sueldo pendiente). */
   incomeBase: number;
+  /** Gastos fijos + variables del período. */
   spent: number;
+  /** Solo gastos variables (base del ritmo diario). */
+  variableSpent: number;
+  pendingFixedExpenses: number;
+  /** Disponible + ingresos pendientes − gastos fijos por pagar. */
+  freeToSpend: number;
   spentPercentage: number | null;
   daysElapsed: number;
   daysRemaining: number;
+  /** Promedio diario de gasto variable. */
   dailyAverage: number;
   safeDailySpend: number;
   projectedClosingBalance: number;
@@ -78,6 +89,9 @@ export function buildWalletSummary(input: WalletSummaryInput): WalletSummary {
   const daysElapsed = getDaysElapsed(period, input.today);
   const daysRemaining = getDaysRemaining(period, input.today);
   const spent = flow.expenses;
+  const variableSpent = sumByType(periodTransactions, 'variable_expense');
+  const pendingFixedExpenses = Math.max(0, input.pendingFixedExpenses);
+  const freeToSpend = calcFreeToSpend(available, pendingIncome, pendingFixedExpenses);
 
   return {
     period,
@@ -91,11 +105,14 @@ export function buildWalletSummary(input: WalletSummaryInput): WalletSummary {
     pendingIncome,
     incomeBase,
     spent,
+    variableSpent,
+    pendingFixedExpenses,
+    freeToSpend,
     spentPercentage: calcSpendingPercentage(spent, incomeBase),
     daysElapsed,
     daysRemaining,
-    dailyAverage: calcDailyAverage(spent, daysElapsed),
-    safeDailySpend: calcSafeDailySpend(available + pendingIncome, daysRemaining),
-    projectedClosingBalance: projectClosingBalance(available, pendingIncome, spent, daysElapsed, period.daysInPeriod),
+    dailyAverage: calcDailyAverage(variableSpent, daysElapsed),
+    safeDailySpend: calcSafeDailySpend(freeToSpend, daysRemaining),
+    projectedClosingBalance: projectClosingBalance(available, pendingIncome, pendingFixedExpenses, variableSpent, daysElapsed, period.daysInPeriod),
   };
 }

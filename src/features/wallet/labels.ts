@@ -5,7 +5,7 @@ import type { AccountType } from '@/types/enums';
 export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
   income: 'Ingreso',
   fixed_expense: 'Gasto fijo',
-  ant_expense: 'Gasto hormiga',
+  variable_expense: 'Gasto variable',
   debt_payment: 'Pago de deuda',
   adjustment: 'Ajuste de saldo',
 };
@@ -13,7 +13,7 @@ export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
 export const TRANSACTION_TYPE_ICONS: Record<TransactionType, IconName> = {
   income: 'arrow-down-left',
   fixed_expense: 'repeat',
-  ant_expense: 'coffee',
+  variable_expense: 'coffee',
   debt_payment: 'file-text',
   adjustment: 'sliders',
 };

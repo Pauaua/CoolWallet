@@ -5,6 +5,9 @@ import type {
   AccountInput,
   Category,
   CategoryInput,
+  FixedExpense,
+  FixedExpenseInput,
+  FixedExpenseOccurrence,
   Profile,
   ProfileInput,
   Settings,
@@ -77,6 +80,33 @@ export interface TransactionsRepository {
   remove(id: string): Promise<void>;
 }
 
+export type PayOccurrenceInput = {
+  accountId: string | null;
+  date: IsoDate;
+  amount: number;
+};
+
+export interface FixedExpensesRepository {
+  /** Gastos fijos no eliminados (activos e inactivos). */
+  list(): Promise<FixedExpense[]>;
+  getById(id: string): Promise<FixedExpense | null>;
+  create(input: FixedExpenseInput): Promise<FixedExpense>;
+  update(id: string, patch: Partial<FixedExpenseInput>): Promise<FixedExpense>;
+  /** Borrado lógico; sus vencimientos pendientes se eliminan (los pagados se conservan). */
+  remove(id: string): Promise<void>;
+  /**
+   * Deja los vencimientos pendientes del rango iguales a `expected`: crea los
+   * que faltan, actualiza montos y borra los que ya no corresponden. Los pagados no se tocan.
+   */
+  syncOccurrences(range: { from: IsoDate; to: IsoDate }, expected: readonly { fixedExpenseId: string; dueDate: IsoDate; amount: number }[]): Promise<void>;
+  /** Vencimientos del rango, por fecha. */
+  listOccurrences(range: { from: IsoDate; to: IsoDate }): Promise<FixedExpenseOccurrence[]>;
+  /** Marca pagado: crea el movimiento de gasto fijo y lo vincula. */
+  markPaid(occurrenceId: string, payment: PayOccurrenceInput): Promise<Transaction>;
+  /** Vuelve a pendiente y elimina el movimiento del pago. */
+  markPending(occurrenceId: string): Promise<void>;
+}
+
 export interface DataRepository {
   /** Crea categorías y cuentas por defecto si la base está vacía. */
   seedDefaults(): Promise<void>;
@@ -90,5 +120,6 @@ export type Repositories = {
   accounts: AccountsRepository;
   categories: CategoriesRepository;
   transactions: TransactionsRepository;
+  fixedExpenses: FixedExpensesRepository;
   data: DataRepository;
 };
