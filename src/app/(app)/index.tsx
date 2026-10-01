@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
-import { AppText, Avatar, Card, Divider, ErrorState, ListLink, LoadingState, Screen, SectionHeader, StatCard } from '@/components';
+import { AppText, Avatar, Button, Card, Divider, ErrorState, Icon, ListLink, LoadingState, Screen, SectionHeader, StatCard } from '@/components';
+import { isBackupOverdue } from '@/features/backup/backupReminder';
 import { DEBT_RISK_META } from '@/features/debts/labels';
 import { useDebtsSummary } from '@/features/debts/queries';
 import { SalaryPendingCard } from '@/features/wallet/SalaryPendingCard';
 import { useWalletSummary } from '@/features/wallet/useWalletSummary';
-import { formatPeriodRange } from '@/lib/dates';
+import { formatLongDate, formatPeriodRange } from '@/lib/dates';
 import { formatCLP, formatPercent } from '@/lib/finance';
 import { useTheme } from '@/theme';
 
@@ -19,7 +20,7 @@ export default function HomeScreen() {
   if (wallet.isPending) return <LoadingState />;
   if (wallet.isError || !wallet.data) return <ErrorState onRetry={() => void wallet.refetch()} />;
 
-  const { profile, netSalary, summary } = wallet.data;
+  const { profile, settings, netSalary, summary } = wallet.data;
   const firstName = profile.name.split(' ')[0] ?? profile.name;
 
   return (
@@ -38,6 +39,21 @@ export default function HomeScreen() {
           </AppText>
         </View>
       </Pressable>
+
+      {isBackupOverdue(settings.lastBackupAt, settings.onboardingCompletedAt, settings.backupReminderDays, new Date()) ? (
+        <Card style={{ gap: spacing.sm }}>
+          <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+            <Icon name="database" color="warningText" />
+            <AppText variant="bodyStrong" style={{ flex: 1 }}>
+              {settings.lastBackupAt ? `Tu último respaldo fue el ${formatLongDate(settings.lastBackupAt)}` : 'Aún no respaldas tus datos'}
+            </AppText>
+          </View>
+          <AppText variant="caption" color="textSecondary">
+            Si pierdes o cambias el teléfono, el respaldo es la única forma de recuperarlos.
+          </AppText>
+          <Button label="Respaldar ahora" icon="upload" variant="secondary" onPress={() => router.push('/respaldo')} />
+        </Card>
+      ) : null}
 
       {summary.salaryPending ? <SalaryPendingCard expectedSalary={netSalary.net} accounts={summary.accounts} /> : null}
 
@@ -84,6 +100,8 @@ export default function HomeScreen() {
         <ListLink icon="settings" title="Configuración" description="Mes financiero, tema, moneda e indicadores" onPress={() => router.push('/configuracion')} />
         <Divider />
         <ListLink icon="shield" title="Seguridad" description="PIN, huella o Face ID y bloqueo automático" onPress={() => router.push('/seguridad')} />
+        <Divider />
+        <ListLink icon="database" title="Respaldo y datos" description="Exportar o importar tu respaldo, borrar datos" onPress={() => router.push('/respaldo')} />
       </Card>
     </Screen>
   );

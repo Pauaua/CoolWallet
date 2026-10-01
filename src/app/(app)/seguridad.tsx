@@ -2,11 +2,9 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { AppText, Button, Card, Divider, ErrorState, Icon, LoadingState, Notice, Screen, SegmentedControl, SwitchRow } from '@/components';
+import { AppText, Card, Divider, ErrorState, Icon, ListLink, LoadingState, Notice, Screen, SegmentedControl, SwitchRow } from '@/components';
 import { LOCK_TIMEOUT_OPTIONS } from '@/features/security/autoLock';
-import { confirmWipe } from '@/features/security/confirmWipe';
 import { requestBiometricAuth, useBiometricSupport } from '@/features/security/useBiometrics';
-import { useResetApp } from '@/features/security/useResetApp';
 import { useSettings, useUpdateSettings } from '@/features/settings/queries';
 import { MIN_TOUCH_TARGET, useTheme } from '@/theme';
 
@@ -15,7 +13,6 @@ export default function SecurityScreen() {
   const settings = useSettings();
   const update = useUpdateSettings();
   const support = useBiometricSupport();
-  const reset = useResetApp();
   const [biometricError, setBiometricError] = useState<string | null>(null);
 
   if (settings.isPending) return <LoadingState />;
@@ -82,13 +79,8 @@ export default function SecurityScreen() {
 
       {update.isError ? <Notice tone="danger" message="No pudimos guardar el cambio. Intenta de nuevo." /> : null}
 
-      <Card style={{ gap: spacing.md }}>
-        <AppText variant="bodyStrong">Borrar todos los datos</AppText>
-        <AppText variant="caption" color="textSecondary">
-          Elimina tu perfil, movimientos, deudas, metas y el PIN de este teléfono. No se puede deshacer.
-        </AppText>
-        <Button label="Borrar todos los datos" icon="trash-2" variant="danger" loading={reset.isPending} onPress={() => confirmWipe(() => reset.mutate())} />
-        {reset.isError ? <Notice tone="danger" message="No pudimos borrar los datos. Intenta de nuevo." /> : null}
+      <Card style={{ padding: 0 }}>
+        <ListLink icon="database" title="Respaldo y datos" description="Exportar, importar o borrar todos tus datos" onPress={() => router.push('/respaldo')} />
       </Card>
     </Screen>
   );

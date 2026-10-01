@@ -1,4 +1,5 @@
 import type { IsoDate, TransactionType } from '@/lib/finance';
+import type { BackupData } from '@/services/backup/backupFormat';
 import type { CategoryKind } from '@/types/enums';
 import type {
   Account,
@@ -139,6 +140,10 @@ export interface DataRepository {
   seedDefaults(): Promise<void>;
   /** Borra físicamente TODOS los datos (restablecer la app). */
   wipeAll(): Promise<void>;
+  /** Todas las filas de todas las tablas (incluidas las eliminadas) para el respaldo. */
+  exportAll(): Promise<BackupData>;
+  /** Reemplaza todos los datos por los del respaldo, en una sola transacción. */
+  replaceAll(data: BackupData): Promise<void>;
 }
 
 export type Repositories = {

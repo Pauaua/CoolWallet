@@ -94,6 +94,7 @@ function RootNavigator() {
         <Stack.Protected guard={isOnboarded && isLocked}>
           <Stack.Screen name="lock" />
           <Stack.Screen name="olvide-pin" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="restaurar" options={{ animation: 'slide_from_right' }} />
         </Stack.Protected>
         <Stack.Protected guard={isOnboarded && !isLocked}>
           <Stack.Screen name="(app)" />

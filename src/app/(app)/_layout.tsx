@@ -16,6 +16,7 @@ const SECONDARY_SCREENS = [
   { name: 'historial', title: 'Historial' },
   { name: 'categorias', title: 'Categorías' },
   { name: 'simulador', title: 'Simulador de pago' },
+  { name: 'respaldo', title: 'Respaldo y datos' },
   { name: 'seguridad', title: 'Seguridad' },
   { name: 'cambiar-pin', title: 'Cambiar PIN' },
 ] as const;
