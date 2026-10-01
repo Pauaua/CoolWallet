@@ -1,4 +1,4 @@
-import { formatAmountInput, formatCLP, formatDecimalInput, formatPercent, parseCLPInput, parseDecimalInput } from '../format';
+import { formatAmountInput, formatCLP, formatCompactCLP, formatDecimalInput, formatPercent, parseCLPInput, parseDecimalInput } from '../format';
 import { ceilMoney, floorMoney, percentageOf, roundMoney, sumAmounts } from '../money';
 import { DEFAULT_INDICATORS, staticIndicatorsSource } from '../params';
 
@@ -110,5 +110,19 @@ describe('money', () => {
 describe('params', () => {
   it('la fuente estática devuelve los indicadores por defecto (sin red)', async () => {
     await expect(staticIndicatorsSource.getLatest()).resolves.toEqual(DEFAULT_INDICATORS);
+  });
+});
+
+describe('formatCompactCLP', () => {
+  it.each([
+    [1_250_000, '$1,3 M'],
+    [2_000_000, '$2 M'],
+    [450_000, '$450 mil'],
+    [1_499, '$1 mil'],
+    [900, '$900'],
+    [0, '$0'],
+    [-75_000, '-$75 mil'],
+  ])('%d → %s', (amount, expected) => {
+    expect(formatCompactCLP(amount)).toBe(expected);
   });
 });

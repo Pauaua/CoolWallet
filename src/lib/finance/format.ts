@@ -63,3 +63,13 @@ export function formatPercent(value: number | null, decimals = 0): string {
   }).format(rounded);
   return `${formatted}%`;
 }
+
+/** Monto abreviado para ejes de gráficos: 1.250.000 → "$1,3 M", 450.000 → "$450 mil", 900 → "$900". */
+export function formatCompactCLP(amount: number): string {
+  const sign = amount < 0 ? '-' : '';
+  const abs = Math.abs(Math.round(amount));
+  const oneDecimal = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 });
+  if (abs >= 1_000_000) return `${sign}$${oneDecimal.format(abs / 1_000_000)} M`;
+  if (abs >= 1_000) return `${sign}$${Math.round(abs / 1_000)} mil`;
+  return `${sign}$${abs}`;
+}

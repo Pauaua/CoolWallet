@@ -13,7 +13,7 @@ Sin backend, sin cuentas, sin llamadas de red: todo vive en el dispositivo. Se p
 - `expo-sqlite` + Drizzle ORM 0.45 (migraciones de `drizzle-kit`) · TanStack Query v5 · react-hook-form + zod v4
 - `expo-secure-store` (hash del PIN) · `expo-local-authentication` · `expo-crypto` · `expo-image-picker` + `expo-file-system` (foto de perfil)
 - Jest (`jest-expo`) + `@testing-library/react-native` v14 · `better-sqlite3` (solo tests de repositorios)
-- Próximas fases: react-native-gifted-charts, expo-notifications, expo-sharing, expo-document-picker.
+- react-native-gifted-charts · expo-notifications (solo locales) · expo-sharing + expo-document-picker (respaldo y CSV) · drizzle-zod (validación del respaldo)
 
 ## Comandos
 
@@ -41,8 +41,9 @@ src/
     olvide-pin.tsx      # restablecer borrando datos
     (app)/_layout.tsx   # Drawer con contenido personalizado (+ pantallas secundarias con "Volver")
     (app)/<módulo>.tsx  # gastos/ y deudas/ son carpetas con Stack propio
-    (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, categorias.tsx, simulador.tsx, seguridad.tsx, cambiar-pin.tsx
-    (modals)/           # formularios modales: nuevo-ingreso, ajustar-saldo, cuenta, movimiento/[id], gasto-rapido, gasto-fijo, categoria, deuda/[id], deuda-form, abono
+    (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, categorias.tsx, simulador.tsx, respaldo.tsx, seguridad.tsx, cambiar-pin.tsx
+    (modals)/           # formularios modales: nuevo-ingreso, ajustar-saldo, cuenta, movimiento/[id], gasto-rapido, gasto-fijo, categoria, deuda/[id], deuda-form, abono, presupuesto, meta, aporte
+    restaurar.tsx       # restaurar respaldo desde "Olvidé mi PIN" (+ PIN nuevo)
   components/           # UI reutilizable (AppText, Button, TextField, AmountField, SegmentedControl, PinPad, StateViews…)
   features/<módulo>/    # hooks (TanStack Query), formularios (zod) y componentes por módulo
   lib/                  # utilidades puras
@@ -91,6 +92,11 @@ src/
 - **Gastos fijos y variables (decidido con la persona):** lo que el enunciado llamaba "gasto hormiga" se llama **gasto variable** (`variable_expense`, categorías `kind = 'variable'`); la migración `0002` convierte datos antiguos. Los gastos fijos generan vencimientos por período en `fixed_expense_occurrences` (`usePeriodOccurrences` sincroniza de forma idempotente); marcar pagado crea el movimiento en una transacción de BD, y eliminar ese movimiento deja el vencimiento pendiente.
 - **Ritmo de gasto:** el promedio diario, el gasto diario seguro y la proyección usan solo **gastos variables**; los fijos por pagar se descuentan como compromiso conocido (`calcFreeToSpend`, `projectClosingBalance`).
 - **Deudas:** los abonos crean un movimiento `debt_payment` en la misma transacción de BD; eliminar o editar ese movimiento en el historial actualiza el abono. En deudas en cuotas, un pago con `is_installment` avanza una cuota y un abono extra rebaja el saldo (`extraPaidAmount`). El simulador usa el capital pendiente (`calcOutstandingPrincipal`), no la suma de cuotas. El ratio deuda/ingreso usa sueldo líquido + otros ingresos.
+- **Respaldo JSON:** formato `{ app, schemaVersion, exportedAt, data }` con todas las tablas (incluidas filas eliminadas), validado con zod generado desde el esquema Drizzle (`drizzle-zod`). Al cambiar el esquema: subir `BACKUP_SCHEMA_VERSION` y agregar el paso en `BACKUP_MIGRATIONS` (ej. v1→v2 agrega `reminderDaysBefore`). La importación reemplaza todo en una transacción. El PIN nunca va en el respaldo: al restaurar desde "Olvidé mi PIN" se crea uno nuevo.
+- **Notificaciones:** solo locales (`expo-notifications`). `useReminderSync` (en el layout de la app) reprograma, cuando cambian los datos, los avisos de vencimientos de los próximos 60 días (1–2 días antes, 9:00, máx. 60 por el límite de iOS) y el recordatorio de respaldo.
+- **Presupuestos:** uno por categoría (índice único parcial); alertas 80/100% vía `getBudgetAlertLevel`; sugerencia 50/30/20 reparte necesidades y deseos por categoría según el gasto del mes anterior (`suggestBudgets503020`, mayor resto).
+- **Metas de ahorro:** el monto ahorrado es informativo (no mueve dinero entre cuentas).
+- **Reportes:** últimos 6 meses financieros; tasa de ahorro = (ingresos − gastos − pagos de deuda) / ingresos; deuda histórica reconstruida con abonos hasta cada fecha; insights por reglas simples (`features/reports/insights.ts`). CSV con BOM, separador `;` y montos con signo.
 - **Contraste:** `warning` (#D9A13B) no cumple AA como texto; para textos e íconos de estado usar `warningText`. `success` tampoco (3,4:1): para texto verde usar `primary`.
 - **Resumen de Billetera:** `buildWalletSummary` (`features/wallet/walletSummary.ts`) solo combina funciones de `lib/finance` (`calcAccountBalances`, `summarizePeriodFlow`, `projectClosingBalance`…); tiene tests.
 - **Formularios modales** en `src/app/(modals)/` (ingreso extra, ajustar saldo, cuenta, movimiento/[id]); pantallas secundarias del drawer (perfil, sueldo, configuración, historial, seguridad, cambiar PIN) muestran "Volver".
@@ -106,9 +112,8 @@ src/
 - [x] **Fase 1 — Base:** tema claro/oscuro, componentes base, Drawer con 8 módulos y "Bloquear app", pantallas vacías navegables.
 - [x] **Fase 2 — `src/lib/finance/`:** sueldo (AFP, salud, cesantía, impuesto único, honorarios), período financiero, flujo, gastos (anualizar, hormiga, recurrentes), deudas (cuota francesa, amortización, estado, simulador bola de nieve/avalancha), presupuestos, metas y formato. Cobertura: 100% líneas, ~98% ramas.
 - [x] **Fase 3 — Datos y acceso:** esquema de 11 tablas + migración inicial, seed, repositorios (perfil, configuración, cuentas, categorías, datos), onboarding, PIN con bloqueo por intentos, biometría, bloqueo automático, "Olvidé mi PIN", perfil con foto y pantalla de seguridad.
-  - Pendiente en fase 7: en "Olvidé mi PIN", la opción **restaurar un respaldo** (requiere la importación de respaldos).
 - [x] **Fase 4 — Inicio y Billetera:** resumen (líquido, gastado, disponible), desglose del sueldo, configuración (mes financiero, tema, moneda, UF/UTM), cuentas con saldo, ingresos extra, ajustes de saldo, registro del sueldo en un toque, % gastado, gasto diario promedio y seguro, proyección al cierre, flujo del mes e historial con filtros. Migración `0001` (flag de sueldo e índice por cuenta).
 - [x] **Fase 5 — Gastos:** gastos fijos (vencimientos por período, marcar pagado/pendiente, próximo vencimiento, pausar), gastos variables con registro rápido (montos frecuentes + categoría en 2 toques), total, % del ingreso, costo anual, top 3, dona por categoría y comparación con el mes anterior; gestión de categorías (ícono, color, grupo 50/30/20). Migración `0002` (hormiga → variable).
 - [x] **Fase 6 — Deudas:** pendientes, en cuotas y variables; abonos (cuota o extra) que descuentan de la billetera; cuotas restantes, saldo, término estimado e interés pagado/por pagar; estado (al día/por vencer/vencida); deuda total, pago mensual comprometido y semáforo deuda/ingreso; simulador bola de nieve vs avalancha. Migración `0003` (fecha de la deuda). Inicio muestra el total real.
-- [ ] Fase 7 — Extras (presupuestos, metas, calendario, reportes, CSV, respaldo)
+- [x] **Fase 7 — Extras:** respaldo/restauración JSON versionado (con test de ciclo completo y de migración v1→v2), recordatorio de respaldo, restaurar desde "Olvidé mi PIN"; presupuestos con alertas y 50/30/20; metas de ahorro; calendario de vencimientos con notificaciones locales; reportes de 6 meses con insights; exportar CSV. Migración `0004`.
 - [ ] Fase 8 — Pulido y README
