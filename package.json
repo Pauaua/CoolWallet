@@ -72,7 +72,8 @@
     "test:watch": "jest --watch",
     "check": "npm run typecheck && npm run lint && npm test",
     "test:coverage": "jest --coverage",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "android:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-android.ps1"
   },
   "private": true,
   "jest": {

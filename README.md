@@ -66,6 +66,18 @@ La primera carga tarda un poco (se arma el paquete de la app). Luego verás la b
 | La huella o Face ID no aparecen | En Expo Go funciona la huella en Android. **Face ID en iPhone requiere un build propio** (no Expo Go); mientras tanto, entra con tu PIN. |
 | No puedo activar los recordatorios | **En Android con Expo Go no hay notificaciones** (Expo Go las quitó desde el SDK 53); la app lo indica y todo lo demás funciona igual. En iPhone con Expo Go, o en una versión instalada de la app (build propio), actívalos en *Inicio → Configuración → Notificaciones*. Son locales: no necesitan internet. |
 
+## Versión instalada (build de desarrollo) con Android Studio
+
+Necesaria solo para lo que Expo Go no permite en Android, como las **notificaciones**.
+
+1. **Android Studio → SDK Manager**: instala *Android SDK Platform 36* y *Android SDK Build-Tools*.
+2. **JDK 17**: `winget install EclipseAdoptium.Temurin.17.JDK`. No hace falta cambiar `JAVA_HOME`: el script del proyecto usa el JDK 17 solo mientras compila.
+3. En el teléfono, activa **Opciones de desarrollador → Depuración USB**, conéctalo por cable y acepta el aviso. Comprueba con `adb devices`.
+4. Compila e instala: `npm run android:build` (la primera vez tarda 10–20 minutos).
+5. Para el día a día: `npx expo start` y abre la app **Control de Gastos** instalada (no Expo Go). Solo vuelve a compilar cuando se agregue una librería nativa.
+
+La app instalada guarda sus propios datos, separados de Expo Go: usa un respaldo para pasarlos.
+
 ## Tus datos
 
 - Se guardan en una base de datos **SQLite dentro del teléfono**. Nada sale del dispositivo salvo que tú exportes un archivo.

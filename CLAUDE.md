@@ -25,6 +25,7 @@ npm test                # jest
 npm run test:coverage   # cobertura (umbral exigido en src/lib/finance/)
 npm run check           # typecheck + lint + test (correr antes de cada commit de fase)
 npm run db:generate     # tras cambiar src/db/schema.ts: genera la migración en src/db/migrations/
+npm run android:build   # build de desarrollo local (Android Studio): usa JDK 17 solo en ese proceso (scripts/run-android.ps1)
 npx expo install <pkg>  # SIEMPRE para instalar dependencias (versiones compatibles con el SDK)
 ```
 
