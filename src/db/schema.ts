@@ -62,6 +62,8 @@ export const settings = sqliteTable('settings', {
   lockTimeoutMinutes: integer('lock_timeout_minutes').notNull().default(1),
   /** Cada cuántos días recordar respaldar (0 = nunca). */
   backupReminderDays: integer('backup_reminder_days').notNull().default(14),
+  /** Días de anticipación de los avisos de vencimiento (1 o 2). */
+  reminderDaysBefore: integer('reminder_days_before').notNull().default(1),
   lastBackupAt: text('last_backup_at'),
   ufValue: integer('uf_value'),
   utmValue: integer('utm_value'),

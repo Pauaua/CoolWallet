@@ -16,6 +16,7 @@ import {
   getDebtStatus,
   getInstallmentAmount,
   getNextDueDate,
+  listInstallmentDueDates,
   orderDebtsByStrategy,
   simulatePayoff,
   toPayoffDebt,
@@ -350,5 +351,25 @@ describe('abonos extra en deudas en cuotas', () => {
     expect(calcOutstandingPrincipal({ ...consumerLoan, extraPaidAmount: 100_000 })).toBe(base - 100_000);
     expect(calcOutstandingPrincipal({ ...consumerLoan, installmentsPaid: 0, extraPaidAmount: 200_000 })).toBe(800_000);
     expect(getDebtStatus({ ...consumerLoan, extraPaidAmount: 5_000_000 }, TODAY)).toBe('paid');
+  });
+});
+
+describe('listInstallmentDueDates', () => {
+  it('cuotas del rango con su número y si están pagadas', () => {
+    expect(listInstallmentDueDates(consumerLoan, '2026-09-01', '2026-10-31')).toEqual([
+      { date: '2026-09-05', number: 4, isPaid: true },
+      { date: '2026-10-05', number: 5, isPaid: false },
+    ]);
+  });
+
+  it('no pasa de la última cuota y respeta fines de mes', () => {
+    expect(listInstallmentDueDates(consumerLoan, '2027-05-01', '2027-12-31')).toEqual([{ date: '2027-05-05', number: 12, isPaid: false }]);
+    expect(listInstallmentDueDates({ ...consumerLoan, firstPaymentDate: '2026-01-31' }, '2026-02-01', '2026-02-28')[0]?.date).toBe('2026-02-28');
+  });
+
+  it('sin cuotas o sin fecha: vacío', () => {
+    expect(listInstallmentDueDates(friendDebt, '2026-01-01', '2026-12-31')).toEqual([]);
+    expect(listInstallmentDueDates({ ...consumerLoan, firstPaymentDate: undefined }, '2026-01-01', '2026-12-31')).toEqual([]);
+    expect(listInstallmentDueDates({ ...consumerLoan, installmentsTotal: undefined }, '2026-01-01', '2026-12-31')).toEqual([]);
   });
 });

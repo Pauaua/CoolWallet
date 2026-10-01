@@ -353,3 +353,20 @@ export function toPayoffDebt(id: string, debt: FinanceDebt): PayoffDebt {
 export function estimateDebtFreeDate(from: IsoDate | Date, months: number): IsoDate {
   return toIsoDate(addMonths(parseIsoDate(from), Math.max(0, Math.trunc(months))));
 }
+
+export type InstallmentDueDate = { date: IsoDate; number: number; isPaid: boolean };
+
+/** Vencimientos de cuotas de una deuda en cuotas entre `from` y `to` (inclusive). */
+export function listInstallmentDueDates(debt: FinanceDebt, from: IsoDate, to: IsoDate): InstallmentDueDate[] {
+  if (debt.kind !== 'installment' || !debt.firstPaymentDate) return [];
+  const first = parseIsoDate(debt.firstPaymentDate);
+  const total = debt.installmentsTotal ?? 0;
+  const paid = debt.installmentsPaid ?? 0;
+  const result: InstallmentDueDate[] = [];
+  for (let index = 0; index < total; index += 1) {
+    const date = toIsoDate(addMonths(first, index));
+    if (date > to) break;
+    if (date >= from) result.push({ date, number: index + 1, isPaid: index < paid });
+  }
+  return result;
+}

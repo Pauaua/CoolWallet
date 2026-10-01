@@ -17,12 +17,14 @@ import { useAppBootstrap } from '@/features/bootstrap/useAppBootstrap';
 import { useAutoLock } from '@/features/security/useAutoLock';
 import { useSettings } from '@/features/settings/queries';
 import { appRepositories } from '@/services/app';
+import { configureNotifications } from '@/services/notifications';
 import { createQueryClient } from '@/services/queryClient';
 import { RepositoriesProvider } from '@/services/RepositoriesProvider';
 import { useSessionStore } from '@/store/sessionStore';
 import { AppThemeProvider, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+configureNotifications();
 
 export default function RootLayout() {
   const [queryClient] = useState(createQueryClient);

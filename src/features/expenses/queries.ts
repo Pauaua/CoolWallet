@@ -38,6 +38,12 @@ export function usePeriodOccurrences(period: FinancialPeriod | null) {
   });
 }
 
+/** Vencimientos ya generados en un rango (sin sincronizar): para saber cuáles están pagados. */
+export function useOccurrencesInRange(range: { from: string; to: string }) {
+  const { fixedExpenses } = useRepositories();
+  return useQuery({ queryKey: [...OCCURRENCES_KEY, 'range', range.from, range.to], queryFn: () => fixedExpenses.listOccurrences(range) });
+}
+
 /** Refresca gastos fijos, vencimientos, movimientos y saldos. */
 function useInvalidateExpenses() {
   const queryClient = useQueryClient();

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { deleteAllProfilePhotos } from '@/services/files/profilePhoto';
+import { cancelAllReminders } from '@/services/notifications';
 import { useRepositories } from '@/services/RepositoriesProvider';
 import { pinService } from '@/services/security';
 import { useSessionStore } from '@/store/sessionStore';
@@ -18,6 +19,7 @@ export function useResetApp() {
       await data.wipeAll();
       await pinService.clear();
       deleteAllProfilePhotos();
+      await cancelAllReminders();
       await data.seedDefaults();
     },
     onSuccess: () => {

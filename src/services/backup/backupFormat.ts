@@ -19,7 +19,7 @@ import {
  * Versión del formato del respaldo. Súbela cuando cambie el esquema de forma
  * que un respaldo antiguo necesite transformarse, y agrega su paso en `BACKUP_MIGRATIONS`.
  */
-export const BACKUP_SCHEMA_VERSION = 1;
+export const BACKUP_SCHEMA_VERSION = 2;
 export const BACKUP_APP_ID = 'control-gastos';
 
 /** Tablas del respaldo, en orden seguro para insertar (padres antes que hijos). */
@@ -73,7 +73,22 @@ const backupHeaderSchema = z.object({
 
 /** Transformaciones de respaldos antiguos: la clave es la versión de ORIGEN. */
 type RawBackup = Record<string, unknown> & { schemaVersion: number };
-const BACKUP_MIGRATIONS: Record<number, (backup: RawBackup) => RawBackup> = {};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+const BACKUP_MIGRATIONS: Record<number, (backup: RawBackup) => RawBackup> = {
+  /** v1 → v2: `settings.reminderDaysBefore` (avisos de vencimiento), por defecto 1 día. */
+  1: (backup) => {
+    const data = isRecord(backup.data) ? backup.data : {};
+    const settingsRows = Array.isArray(data.settings) ? data.settings : [];
+    return {
+      ...backup,
+      data: { ...data, settings: settingsRows.map((row: unknown) => (isRecord(row) ? { reminderDaysBefore: 1, ...row } : row)) },
+    };
+  },
+};
 
 export type ParseBackupResult = { ok: true; backup: BackupFile } | { ok: false; error: string };
 

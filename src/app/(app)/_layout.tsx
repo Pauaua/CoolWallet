@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Drawer, type DrawerContentComponentProps } from 'expo-router/drawer';
 
 import { IconButton } from '@/components';
+import { useReminderSync } from '@/features/calendar/useReminderSync';
 import { DrawerPanel } from '@/features/navigation/DrawerPanel';
 import { APP_MODULES } from '@/features/navigation/modules';
 import { useProfile } from '@/features/profile/queries';
@@ -28,6 +29,7 @@ function goBack() {
 
 export default function AppLayout() {
   const { colors, typography, spacing } = useTheme();
+  useReminderSync();
 
   return (
     <Drawer

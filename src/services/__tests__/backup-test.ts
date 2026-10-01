@@ -127,6 +127,27 @@ describe('respaldo JSON', () => {
   });
 });
 
+describe('respaldos antiguos', () => {
+  it('un respaldo v1 (sin reminderDaysBefore) se migra y se importa', async () => {
+    const { repos } = await populatedDatabase();
+    const current = await createBackup(repos.data, '2026-09-30T12:00:00.000Z');
+    const v1 = {
+      ...current,
+      schemaVersion: 1,
+      data: { ...current.data, settings: current.data.settings.map(({ reminderDaysBefore: _removed, ...row }) => row) },
+    };
+    const prepared = prepareImport(JSON.stringify(v1));
+    expect(prepared.ok).toBe(true);
+    if (!prepared.ok) return;
+    expect(prepared.backup.schemaVersion).toBe(BACKUP_SCHEMA_VERSION);
+    expect(prepared.backup.data.settings[0]?.reminderDaysBefore).toBe(1);
+
+    const target = createSqliteRepositories(createTestContext());
+    await importBackup(target.data, prepared.backup);
+    expect((await target.settings.get()).theme).toBe('dark');
+  });
+});
+
 describe('parseBackup', () => {
   it('rechaza archivos que no son respaldos', () => {
     expect(parseBackup('no es json')).toEqual({ ok: false, error: 'El archivo no es un JSON válido.' });

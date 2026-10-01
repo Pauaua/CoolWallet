@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
 
-import { AmountField, AppText, Button, Card, Divider, ErrorState, LoadingState, Notice, Screen, SectionHeader, SegmentedControl } from '@/components';
+import { AmountField, AppText, Button, Card, Divider, ErrorState, LoadingState, Notice, Screen, SectionHeader, SegmentedControl, SwitchRow } from '@/components';
 import { buildSalaryParams } from '@/features/profile/netSalary';
 import { useProfile } from '@/features/profile/queries';
 import { useSettings, useUpdateSettings } from '@/features/settings/queries';
 import { indicatorsSchema, type IndicatorsFormOutput, type IndicatorsFormValues } from '@/features/settings/indicatorsSchema';
 import { formatLongDate } from '@/lib/dates';
 import { formatAmountInput, PARAMS_DISCLAIMER, toIsoDate } from '@/lib/finance';
+import { ensureNotificationPermission } from '@/services/notifications';
 import { useTheme } from '@/theme';
 import type { Settings } from '@/types/models';
 
@@ -68,6 +69,9 @@ function SettingsContent({ settings, payDay }: { settings: Settings; payDay: num
         </View>
       </Card>
       {update.isError ? <Notice tone="danger" message="No pudimos guardar el cambio. Intenta de nuevo." /> : null}
+
+      <SectionHeader title="Notificaciones" />
+      <NotificationsCard settings={settings} />
 
       <SectionHeader title="Indicadores" />
       <IndicatorsCard settings={settings} />
@@ -140,6 +144,48 @@ function IndicatorsCard({ settings }: { settings: Settings }) {
       {saved ? <Notice message="Indicadores actualizados." icon="check-circle" /> : null}
       <Button label="Guardar indicadores" icon="check" loading={update.isPending} onPress={() => void handleSubmit(save)()} />
       {isCustom ? <Button label="Usar valores de la app" variant="ghost" onPress={restoreDefaults} /> : null}
+    </Card>
+  );
+}
+
+function NotificationsCard({ settings }: { settings: Settings }) {
+  const { spacing } = useTheme();
+  const update = useUpdateSettings();
+  const [denied, setDenied] = useState(false);
+
+  const toggle = async (enabled: boolean) => {
+    setDenied(false);
+    if (enabled && !(await ensureNotificationPermission())) {
+      setDenied(true);
+      return;
+    }
+    update.mutate({ notificationsEnabled: enabled });
+  };
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <SwitchRow
+        label="Recordatorios"
+        description="Avisos locales de gastos fijos, cuotas y respaldo. No usan internet."
+        value={settings.notificationsEnabled}
+        onValueChange={(value) => void toggle(value)}
+        disabled={update.isPending}
+      />
+      {denied ? <Notice tone="warning" message="El teléfono no permite notificaciones para esta app. Actívalas en Ajustes del sistema y vuelve a intentarlo." /> : null}
+      {settings.notificationsEnabled ? (
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="bodyStrong">Avisarme antes del vencimiento</AppText>
+          <SegmentedControl
+            accessibilityLabel="Días de anticipación"
+            options={[
+              { value: 1, label: '1 día antes' },
+              { value: 2, label: '2 días antes' },
+            ]}
+            value={settings.reminderDaysBefore}
+            onChange={(reminderDaysBefore) => update.mutate({ reminderDaysBefore })}
+          />
+        </View>
+      ) : null}
     </Card>
   );
 }

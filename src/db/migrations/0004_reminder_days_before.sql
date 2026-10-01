@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `reminder_days_before` integer DEFAULT 1 NOT NULL;
