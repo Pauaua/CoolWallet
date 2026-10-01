@@ -1,4 +1,4 @@
-import { apply503020, calcBudgetRemaining, calcBudgetUsage, getBudgetAlertLevel } from '../budget';
+import { apply503020, calcBudgetRemaining, calcBudgetUsage, distributeAmount, getBudgetAlertLevel, suggestBudgets503020 } from '../budget';
 import { calcGoalProgress, calcMonthlySavingNeeded } from '../goals';
 
 describe('apply503020', () => {
@@ -95,5 +95,44 @@ describe('calcGoalProgress', () => {
 
   it('meta sin monto', () => {
     expect(calcGoalProgress(100, 0)).toEqual({ percentage: 0, remaining: 0, isComplete: false });
+  });
+});
+
+describe('distributeAmount', () => {
+  it('reparte proporcionalmente y suma exacto', () => {
+    expect(distributeAmount(100, [1, 1, 1])).toEqual([34, 33, 33]);
+    expect(distributeAmount(1_000, [3, 1])).toEqual([750, 250]);
+    const parts = distributeAmount(500_001, [20_000, 13_000, 7_000]);
+    expect(parts.reduce((a, b) => a + b, 0)).toBe(500_001);
+  });
+
+  it('sin pesos reparte en partes iguales; casos vacíos', () => {
+    expect(distributeAmount(90, [0, 0, 0])).toEqual([30, 30, 30]);
+    expect(distributeAmount(90, [])).toEqual([]);
+    expect(distributeAmount(0, [1, 2])).toEqual([0, 0]);
+    expect(distributeAmount(10, [-5, 1])).toEqual([0, 10]);
+  });
+});
+
+describe('suggestBudgets503020', () => {
+  it('reparte necesidades y deseos según el gasto anterior', () => {
+    const result = suggestBudgets503020(
+      1_000_000,
+      [
+        { id: 'rent', budgetGroup: 'needs' },
+        { id: 'food', budgetGroup: 'needs' },
+        { id: 'coffee', budgetGroup: 'wants' },
+        { id: 'salary', budgetGroup: null },
+      ],
+      { rent: 300_000, food: 100_000 },
+    );
+    expect(result).toEqual({
+      limits: [
+        { categoryId: 'rent', monthlyLimit: 375_000 },
+        { categoryId: 'food', monthlyLimit: 125_000 },
+        { categoryId: 'coffee', monthlyLimit: 300_000 },
+      ],
+      savings: 200_000,
+    });
   });
 });

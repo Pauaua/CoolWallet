@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { computeNetSalary } from '@/features/profile/netSalary';
+import { computeMonthlyNetIncome } from '@/features/profile/netSalary';
 import { useProfile } from '@/features/profile/queries';
 import { useSettings } from '@/features/settings/queries';
-import { sumAmounts, toIsoDate } from '@/lib/finance';
+import { toIsoDate } from '@/lib/finance';
 import { queryKeys } from '@/services/queryClient';
 import { useRepositories } from '@/services/RepositoriesProvider';
 import type { DebtPaymentInput } from '@/services/types';
@@ -40,7 +40,7 @@ export function useDebtsSummary() {
 
   const data = useMemo(() => {
     if (!debts.data || !payments.data || !profile.data || !settings.data) return null;
-    const netIncome = sumAmounts([computeNetSalary(profile.data, settings.data).net, profile.data.otherIncome]);
+    const netIncome = computeMonthlyNetIncome(profile.data, settings.data);
     return { netIncome, ...buildDebtsSummary(debts.data, payments.data, netIncome, today) };
   }, [debts.data, payments.data, profile.data, settings.data, today]);
 

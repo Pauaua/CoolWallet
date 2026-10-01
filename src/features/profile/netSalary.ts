@@ -1,4 +1,4 @@
-import { calcNetSalary, DEFAULT_SALARY_PARAMS, type NetSalaryBreakdown, type NetSalaryInput, type SalaryParams } from '@/lib/finance';
+import { calcNetSalary, DEFAULT_SALARY_PARAMS, sumAmounts, type NetSalaryBreakdown, type NetSalaryInput, type SalaryParams } from '@/lib/finance';
 import type { Profile, Settings } from '@/types/models';
 
 /** Parámetros de sueldo con la UF/UTM que la persona haya editado (o los valores por defecto). */
@@ -29,4 +29,9 @@ export function toNetSalaryInput(profile: Profile): NetSalaryInput {
 /** Desglose del sueldo líquido del perfil. */
 export function computeNetSalary(profile: Profile, settings: Settings | null | undefined): NetSalaryBreakdown {
   return calcNetSalary(toNetSalaryInput(profile), buildSalaryParams(settings));
+}
+
+/** Ingreso líquido mensual esperado: sueldo líquido + otros ingresos recurrentes. */
+export function computeMonthlyNetIncome(profile: Profile, settings: Settings | null | undefined): number {
+  return sumAmounts([computeNetSalary(profile, settings).net, profile.otherIncome]);
 }

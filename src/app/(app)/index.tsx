@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 
 import { AppText, Avatar, Button, Card, Divider, ErrorState, Icon, ListLink, LoadingState, Screen, SectionHeader, StatCard } from '@/components';
 import { isBackupOverdue } from '@/features/backup/backupReminder';
+import { useBudgetsData } from '@/features/budgets/queries';
 import { DEBT_RISK_META } from '@/features/debts/labels';
 import { useDebtsSummary } from '@/features/debts/queries';
 import { SalaryPendingCard } from '@/features/wallet/SalaryPendingCard';
@@ -16,6 +17,7 @@ export default function HomeScreen() {
   const { spacing } = useTheme();
   const wallet = useWalletSummary();
   const debts = useDebtsSummary();
+  const budgets = useBudgetsData();
 
   if (wallet.isPending) return <LoadingState />;
   if (wallet.isError || !wallet.data) return <ErrorState onRetry={() => void wallet.refetch()} />;
@@ -53,6 +55,18 @@ export default function HomeScreen() {
           </AppText>
           <Button label="Respaldar ahora" icon="upload" variant="secondary" onPress={() => router.push('/respaldo')} />
         </Card>
+      ) : null}
+
+      {budgets.data && budgets.data.totals.alerts > 0 ? (
+        <Pressable accessibilityRole="button" onPress={() => router.push('/presupuestos')} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+          <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+            <Icon name="alert-triangle" color="warningText" />
+            <AppText style={{ flex: 1 }}>
+              {budgets.data.totals.alerts === 1 ? '1 presupuesto llegó al 80% o más' : `${budgets.data.totals.alerts} presupuestos llegaron al 80% o más`}
+            </AppText>
+            <Icon name="chevron-right" size={18} color="textSecondary" />
+          </Card>
+        </Pressable>
       ) : null}
 
       {summary.salaryPending ? <SalaryPendingCard expectedSalary={netSalary.net} accounts={summary.accounts} /> : null}

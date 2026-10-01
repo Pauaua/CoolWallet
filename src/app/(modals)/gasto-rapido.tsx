@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { AmountField, AppText, Button, ChipGroup, ColorIcon, DateField, EmptyState, ErrorState, FormScreen, LoadingState, Notice, TextField } from '@/components';
+import { detectBudgetCrossing } from '@/features/budgets/budgetModel';
+import { useBudgetsData } from '@/features/budgets/queries';
 import { useCategories } from '@/features/categories/queries';
 import { useAccounts, useCreateTransaction, useTransactions } from '@/features/wallet/queries';
 import { formatAmountInput, formatCLP, getFrequentAmounts, parseCLPInput, toIsoDate } from '@/lib/finance';
@@ -18,6 +20,7 @@ export default function QuickExpenseScreen() {
   const categories = useCategories(['variable', 'general']);
   const history = useTransactions({ types: ['variable_expense'] });
   const create = useCreateTransaction();
+  const budgets = useBudgetsData();
 
   const [amountText, setAmountText] = useState('');
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -51,7 +54,24 @@ export default function QuickExpenseScreen() {
     setError(null);
     create.mutate(
       { type: 'variable_expense', amount, date, accountId: selectedAccountId, categoryId, note: note.trim() || null },
-      { onSuccess: () => router.back() },
+      { onSuccess: () => warnIfBudgetCrossed(categoryId, amount) },
+    );
+  };
+
+  /** Aviso al cruzar el 80% o el 100% del presupuesto de la categoría. */
+  const warnIfBudgetCrossed = (categoryId: string | null, amount: number) => {
+    const row = categoryId ? budgets.data?.rows.find((item) => item.budget.categoryId === categoryId) : undefined;
+    const crossing = row ? detectBudgetCrossing(row.spent, amount, row.budget.monthlyLimit) : null;
+    if (!row || !crossing) {
+      router.back();
+      return;
+    }
+    const name = row.category?.name ?? 'esta categoría';
+    const spentAfter = row.spent + amount;
+    Alert.alert(
+      crossing === 'exceeded' ? `Superaste tu presupuesto de ${name}` : `Llegaste al 80% de tu presupuesto de ${name}`,
+      `Llevas ${formatCLP(spentAfter)} de ${formatCLP(row.budget.monthlyLimit)} este mes.`,
+      [{ text: 'Entendido', onPress: () => router.back() }],
     );
   };
 

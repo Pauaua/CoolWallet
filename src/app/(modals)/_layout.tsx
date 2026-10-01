@@ -27,6 +27,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="deuda/[id]" options={{ title: 'Deuda' }} />
       <Stack.Screen name="deuda-form" options={{ title: 'Deuda' }} />
       <Stack.Screen name="abono" options={{ title: 'Registrar pago' }} />
+      <Stack.Screen name="presupuesto" options={{ title: 'Presupuesto' }} />
     </Stack>
   );
 }

@@ -5,6 +5,7 @@ import type {
   Account,
   AccountInput,
   Category,
+  Budget,
   CategoryInput,
   Debt,
   DebtInput,
@@ -14,6 +15,8 @@ import type {
   FixedExpenseOccurrence,
   Profile,
   ProfileInput,
+  SavingsGoal,
+  SavingsGoalInput,
   Settings,
   SettingsPatch,
   Transaction,
@@ -135,6 +138,28 @@ export interface DebtsRepository {
   removePayment(paymentId: string): Promise<void>;
 }
 
+export interface BudgetsRepository {
+  /** Presupuestos activos (uno por categoría). */
+  list(): Promise<Budget[]>;
+  /** Crea o actualiza el presupuesto de una categoría. */
+  upsert(categoryId: string, monthlyLimit: number): Promise<Budget>;
+  /** Crea o actualiza varios presupuestos en una transacción (sugerencia 50/30/20). */
+  upsertMany(limits: readonly { categoryId: string; monthlyLimit: number }[]): Promise<void>;
+  /** Borrado lógico. */
+  remove(id: string): Promise<void>;
+}
+
+export interface SavingsGoalsRepository {
+  list(): Promise<SavingsGoal[]>;
+  getById(id: string): Promise<SavingsGoal | null>;
+  create(input: SavingsGoalInput): Promise<SavingsGoal>;
+  update(id: string, patch: Partial<SavingsGoalInput>): Promise<SavingsGoal>;
+  /** Suma (o resta, si es negativo) al monto ahorrado; nunca queda bajo 0. */
+  addContribution(id: string, amount: number): Promise<SavingsGoal>;
+  /** Borrado lógico. */
+  remove(id: string): Promise<void>;
+}
+
 export interface DataRepository {
   /** Crea categorías y cuentas por defecto si la base está vacía. */
   seedDefaults(): Promise<void>;
@@ -154,5 +179,7 @@ export type Repositories = {
   transactions: TransactionsRepository;
   fixedExpenses: FixedExpensesRepository;
   debts: DebtsRepository;
+  budgets: BudgetsRepository;
+  savingsGoals: SavingsGoalsRepository;
   data: DataRepository;
 };
