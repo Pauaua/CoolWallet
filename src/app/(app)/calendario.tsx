@@ -10,6 +10,7 @@ import { useDebtsSummary } from '@/features/debts/queries';
 import { useFixedExpenses, useOccurrencesInRange } from '@/features/expenses/queries';
 import { useSettings } from '@/features/settings/queries';
 import { formatLongDate } from '@/lib/dates';
+import { notificationsSupported } from '@/services/notifications';
 import { formatCLP, parseIsoDate, sumAmounts, toIsoDate } from '@/lib/finance';
 import { MIN_TOUCH_TARGET, useTheme, type ColorTokens } from '@/theme';
 
@@ -145,7 +146,7 @@ export default function CalendarScreen() {
         )}
       </Card>
 
-      {settings.data && !settings.data.notificationsEnabled ? (
+      {notificationsSupported && settings.data && !settings.data.notificationsEnabled ? (
         <Notice message="Activa los recordatorios en Configuración para recibir un aviso antes de cada vencimiento." />
       ) : null}
     </Screen>

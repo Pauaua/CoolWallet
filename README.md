@@ -14,7 +14,7 @@ App móvil para ver con claridad tu flujo de dinero: lo que entra, lo que sale, 
 | **Deudas** | Deudas pendientes, en cuotas y variables; abonos, cuotas restantes, término estimado, intereses, semáforo deuda/ingreso y simulador bola de nieve vs avalancha. |
 | **Presupuestos** | Límite mensual por categoría con alertas al 80% y 100%, y la regla 50/30/20. |
 | **Metas de ahorro** | Cuánto ahorrar al mes para llegar a cada meta y tu avance. |
-| **Calendario** | Vencimientos del mes y recordatorios 1 o 2 días antes (notificaciones locales). |
+| **Calendario** | Vencimientos del mes y recordatorios 1 o 2 días antes (notificaciones locales; no disponibles en Expo Go para Android). |
 | **Reportes** | Últimos 6 meses, tasa de ahorro, evolución de la deuda, observaciones automáticas y exportación a CSV. |
 
 La app está protegida con un PIN de 4 a 6 dígitos y, si quieres, con tu huella o Face ID.
@@ -64,7 +64,7 @@ La primera carga tarda un poco (se arma el paquete de la app). Luego verás la b
 | Cambios que no aparecen o errores raros al cargar | `npx expo start -c` (limpia la caché). |
 | “Network response timed out” | Revisa que estén en la misma Wi‑Fi o usa `--tunnel`. |
 | La huella o Face ID no aparecen | En Expo Go funciona la huella en Android. **Face ID en iPhone requiere un build propio** (no Expo Go); mientras tanto, entra con tu PIN. |
-| No llegan los recordatorios | Actívalos en *Inicio → Configuración → Notificaciones* y acepta el permiso. Son notificaciones locales: no necesitan internet. |
+| No puedo activar los recordatorios | **En Android con Expo Go no hay notificaciones** (Expo Go las quitó desde el SDK 53); la app lo indica y todo lo demás funciona igual. En iPhone con Expo Go, o en una versión instalada de la app (build propio), actívalos en *Inicio → Configuración → Notificaciones*. Son locales: no necesitan internet. |
 
 ## Tus datos
 

@@ -25,7 +25,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { AppThemeProvider, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
-configureNotifications();
+void configureNotifications();
 
 export default function RootLayout() {
   const [queryClient] = useState(createQueryClient);

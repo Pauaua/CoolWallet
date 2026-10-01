@@ -10,7 +10,7 @@ import { useSettings, useUpdateSettings } from '@/features/settings/queries';
 import { indicatorsSchema, type IndicatorsFormOutput, type IndicatorsFormValues } from '@/features/settings/indicatorsSchema';
 import { formatLongDate } from '@/lib/dates';
 import { formatAmountInput, PARAMS_DISCLAIMER, toIsoDate } from '@/lib/finance';
-import { ensureNotificationPermission } from '@/services/notifications';
+import { ensureNotificationPermission, notificationsSupported } from '@/services/notifications';
 import { useTheme } from '@/theme';
 import type { Settings } from '@/types/models';
 
@@ -161,6 +161,15 @@ function NotificationsCard({ settings }: { settings: Settings }) {
     }
     update.mutate({ notificationsEnabled: enabled });
   };
+
+  if (!notificationsSupported) {
+    return (
+      <Card style={{ gap: spacing.sm }}>
+        <AppText variant="bodyStrong">Recordatorios</AppText>
+        <Notice message="Expo Go en Android no permite notificaciones. Funcionan en iPhone con Expo Go y en una versión instalada de la app (build propio). El calendario y los avisos dentro de la app funcionan igual." />
+      </Card>
+    );
+  }
 
   return (
     <Card style={{ gap: spacing.md }}>
