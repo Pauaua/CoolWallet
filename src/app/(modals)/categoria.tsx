@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import Feather from '@expo/vector-icons/Feather';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { AppText, Button, ChipGroup, ColorIcon, ErrorState, FormScreen, LoadingState, Notice, TextField } from '@/components';
 import { useCategory, useDeleteCategory, useSaveCategory } from '@/features/categories/queries';
-import { BUDGET_GROUP_OPTIONS, CATEGORY_COLOR_LABELS, CATEGORY_ICON_LABELS, CATEGORY_ICONS, CATEGORY_KIND_OPTIONS } from '@/features/expenses/labels';
+import { ColorPicker, IconPicker } from '@/features/categories/Pickers';
+import { BUDGET_GROUP_OPTIONS, CATEGORY_KIND_OPTIONS } from '@/features/expenses/labels';
 import { categorySchema, type CategoryFormOutput, type CategoryFormValues } from '@/features/expenses/schemas';
-import { MIN_TOUCH_TARGET, resolveCategoryColor, useTheme } from '@/theme';
+import { useTheme } from '@/theme';
 import { CATEGORY_COLORS, type CategoryColor, type CategoryKind } from '@/types/enums';
 import type { Category } from '@/types/models';
 
@@ -35,7 +35,7 @@ function isCategoryColor(value: string): value is CategoryColor {
 }
 
 function CategoryForm({ category, initialKind }: { category: Category | null; initialKind: CategoryKind }) {
-  const { colors, radius, scheme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const save = useSaveCategory();
   const remove = useDeleteCategory();
   const { control, handleSubmit } = useForm<CategoryFormValues, unknown, CategoryFormOutput>({
@@ -93,78 +93,8 @@ function CategoryForm({ category, initialKind }: { category: Category | null; in
           </View>
         )}
       />
-      <Controller
-        control={control}
-        name="color"
-        render={({ field }) => (
-          <View style={{ gap: spacing.sm }}>
-            <AppText variant="label" color="textSecondary">
-              Color
-            </AppText>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }} accessibilityRole="radiogroup" accessibilityLabel="Color">
-              {CATEGORY_COLORS.map((key) => {
-                const selected = field.value === key;
-                return (
-                  <Pressable
-                    key={key}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={CATEGORY_COLOR_LABELS[key]}
-                    onPress={() => field.onChange(key)}
-                    style={{
-                      width: MIN_TOUCH_TARGET,
-                      height: MIN_TOUCH_TARGET,
-                      borderRadius: MIN_TOUCH_TARGET / 2,
-                      borderWidth: selected ? 3 : 0,
-                      borderColor: colors.text,
-                      padding: 3,
-                    }}
-                  >
-                    <View style={{ flex: 1, borderRadius: MIN_TOUCH_TARGET, backgroundColor: resolveCategoryColor(key, scheme) }} />
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        )}
-      />
-      <Controller
-        control={control}
-        name="icon"
-        render={({ field }) => (
-          <View style={{ gap: spacing.sm }}>
-            <AppText variant="label" color="textSecondary">
-              Ícono
-            </AppText>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }} accessibilityRole="radiogroup" accessibilityLabel="Ícono">
-              {CATEGORY_ICONS.map((name) => {
-                const selected = field.value === name;
-                return (
-                  <Pressable
-                    key={name}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={CATEGORY_ICON_LABELS[name] ?? 'Ícono'}
-                    onPress={() => field.onChange(name)}
-                    style={{
-                      width: MIN_TOUCH_TARGET + 4,
-                      height: MIN_TOUCH_TARGET + 4,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: radius.md,
-                      borderWidth: 1,
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.primarySoft : colors.surface,
-                    }}
-                  >
-                    <Feather name={name} size={20} color={selected ? colors.primary : colors.text} />
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        )}
-      />
+      <Controller control={control} name="color" render={({ field }) => <ColorPicker value={field.value} onChange={field.onChange} />} />
+      <Controller control={control} name="icon" render={({ field }) => <IconPicker value={field.value} onChange={field.onChange} />} />
       <Controller
         control={control}
         name="budgetGroup"
