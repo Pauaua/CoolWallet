@@ -1,5 +1,8 @@
 /**
- * Tokens de color de la app. Es el ÚNICO lugar donde se escriben colores
+ * Tokens de color de la app. Partiendo de la paleta del enunciado, `warning`,
+ * `danger` (claro) y `primary`/`primaryDark` (oscuro) se ajustaron para cumplir
+ * contraste AA; `src/theme/__tests__/contrast-test.ts` lo verifica.
+ * Es el ÚNICO lugar donde se escriben colores
  * literales; los componentes siempre leen `useTheme().colors`.
  */
 export type ColorTokens = {
@@ -41,9 +44,9 @@ export const lightColors: ColorTokens = {
   text: '#16261F',
   textSecondary: '#5B6F66',
   success: '#2E9E6B',
-  warning: '#D9A13B',
+  warning: '#B5852A',
   warningText: '#8A5A0B',
-  danger: '#C4524A',
+  danger: '#BA4840',
   overlay: 'rgba(22, 38, 31, 0.45)',
   shadow: '#0B1A13',
   chartIncome: '#1A8A5A',
@@ -52,8 +55,8 @@ export const lightColors: ColorTokens = {
 };
 
 export const darkColors: ColorTokens = {
-  primary: '#3FA27A',
-  primaryDark: '#1F6F50',
+  primary: '#4DB389',
+  primaryDark: '#5FC296',
   accent: '#5BBF94',
   primarySoft: '#1C3A2D',
   onPrimary: '#0F1A15',

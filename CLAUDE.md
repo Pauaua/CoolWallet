@@ -38,7 +38,7 @@ src/
     _layout.tsx         # providers, arranque (migraciones) y Stack.Protected: onboarding / bloqueo / app
     (onboarding)/       # bienvenida → nombre → sueldo → PIN → biometría
     lock.tsx            # pantalla de bloqueo (PIN / biometría)
-    olvide-pin.tsx      # restablecer borrando datos
+    olvide-pin.tsx      # restaurar respaldo o borrar datos
     (app)/_layout.tsx   # Drawer con contenido personalizado (+ pantallas secundarias con "Volver")
     (app)/<módulo>.tsx  # gastos/ y deudas/ son carpetas con Stack propio
     (app)/perfil.tsx, sueldo.tsx, configuracion.tsx, historial.tsx, categorias.tsx, simulador.tsx, respaldo.tsx, seguridad.tsx, cambiar-pin.tsx
@@ -97,7 +97,9 @@ src/
 - **Presupuestos:** uno por categoría (índice único parcial); alertas 80/100% vía `getBudgetAlertLevel`; sugerencia 50/30/20 reparte necesidades y deseos por categoría según el gasto del mes anterior (`suggestBudgets503020`, mayor resto).
 - **Metas de ahorro:** el monto ahorrado es informativo (no mueve dinero entre cuentas).
 - **Reportes:** últimos 6 meses financieros; tasa de ahorro = (ingresos − gastos − pagos de deuda) / ingresos; deuda histórica reconstruida con abonos hasta cada fecha; insights por reglas simples (`features/reports/insights.ts`). CSV con BOM, separador `;` y montos con signo.
-- **Contraste:** `warning` (#D9A13B) no cumple AA como texto; para textos e íconos de estado usar `warningText`. `success` tampoco (3,4:1): para texto verde usar `primary`.
+- **Contraste (verificado por test):** `src/theme/__tests__/contrast-test.ts` exige AA (4,5:1) en todos los pares de texto que usa la app y 3:1 en elementos gráficos, en ambos modos. Por eso `warning` y `danger` (claro) y `primary`/`primaryDark` (oscuro) difieren levemente de la paleta del enunciado. Para textos e íconos de estado usar `warningText` (no `warning`) y para texto verde `primary` (no `success`). Si agregas un par nuevo de texto/fondo, súmalo al test.
+- **Foto de perfil:** se guarda con ruta RELATIVA a los documentos de la app (`profile/avatar-….jpg`) y se resuelve con `resolveProfilePhotoUri`, porque en iOS la ruta absoluta cambia al actualizar la app. Si el archivo no existe (respaldo restaurado en otro teléfono), `Avatar` muestra las iniciales.
+- **Ícono y splash:** generados por `scripts/generate-icons.js` (sin dependencias); splash con variante oscura en `app.json`.
 - **Resumen de Billetera:** `buildWalletSummary` (`features/wallet/walletSummary.ts`) solo combina funciones de `lib/finance` (`calcAccountBalances`, `summarizePeriodFlow`, `projectClosingBalance`…); tiene tests.
 - **Formularios modales** en `src/app/(modals)/` (ingreso extra, ajustar saldo, cuenta, movimiento/[id]); pantallas secundarias del drawer (perfil, sueldo, configuración, historial, seguridad, cambiar PIN) muestran "Volver".
 - **Gráficos:** colores de series en tokens `chartIncome/chartExpense/chartDebt` (claro y oscuro validados con el validador de paletas: banda de luminosidad, croma, daltonismo, contraste). Los colores de estado (`success/warning/danger`) no se usan como series. El flujo del mes se dibuja con barras horizontales propias (3 valores con etiqueta y monto directo); la dona por categoría usa react-native-gifted-charts (máx. 6 porciones, resto en "Otras", separación de 2px y leyenda con ícono, nombre, monto y %). La paleta de categorías (`src/theme/categoryColors.ts`) pasa luminosidad y croma en ambos modos; como la persona elige colores, los gráficos nunca dependen solo del color.
@@ -116,4 +118,4 @@ src/
 - [x] **Fase 5 — Gastos:** gastos fijos (vencimientos por período, marcar pagado/pendiente, próximo vencimiento, pausar), gastos variables con registro rápido (montos frecuentes + categoría en 2 toques), total, % del ingreso, costo anual, top 3, dona por categoría y comparación con el mes anterior; gestión de categorías (ícono, color, grupo 50/30/20). Migración `0002` (hormiga → variable).
 - [x] **Fase 6 — Deudas:** pendientes, en cuotas y variables; abonos (cuota o extra) que descuentan de la billetera; cuotas restantes, saldo, término estimado e interés pagado/por pagar; estado (al día/por vencer/vencida); deuda total, pago mensual comprometido y semáforo deuda/ingreso; simulador bola de nieve vs avalancha. Migración `0003` (fecha de la deuda). Inicio muestra el total real.
 - [x] **Fase 7 — Extras:** respaldo/restauración JSON versionado (con test de ciclo completo y de migración v1→v2), recordatorio de respaldo, restaurar desde "Olvidé mi PIN"; presupuestos con alertas y 50/30/20; metas de ahorro; calendario de vencimientos con notificaciones locales; reportes de 6 meses con insights; exportar CSV. Migración `0004`.
-- [ ] Fase 8 — Pulido y README
+- [x] **Fase 8 — Pulido:** auditoría de contraste automatizada (AA en claro y oscuro) y ajuste de tokens; modo oscuro en selector de fecha, teclado y fondo nativo; foto de perfil robusta ante actualizaciones de iOS; ícono, ícono adaptativo, splash (claro/oscuro) y favicon propios; limpieza de assets de la plantilla; README con instrucciones para Expo Go.

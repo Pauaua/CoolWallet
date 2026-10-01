@@ -8,7 +8,7 @@
     "scheme": "controlgastos",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +30,11 @@
         {
           "backgroundColor": "#1F6F50",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 120,
+          "dark": {
+            "backgroundColor": "#0F1A15",
+            "image": "./assets/images/splash-icon.png"
+          }
         }
       ],
       "expo-font",
@@ -51,11 +55,18 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "color": "#1F6F50"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "backgroundColor": "#F5F8F6"
   }
 }

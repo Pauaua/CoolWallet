@@ -20,7 +20,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   { label, hint, error, prefix, suffix, style, onFocus, onBlur, ...inputProps },
   ref,
 ) {
-  const { colors, radius, spacing, typography } = useTheme();
+  const { colors, radius, scheme, spacing, typography } = useTheme();
   const [focused, setFocused] = useState(false);
   const borderColor = error ? colors.danger : focused ? colors.primary : colors.border;
 
@@ -49,6 +49,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           accessibilityHint={error ?? hint}
           placeholderTextColor={colors.textSecondary}
           selectionColor={colors.accent}
+          keyboardAppearance={scheme}
           onFocus={(event) => {
             setFocused(true);
             onFocus?.(event);

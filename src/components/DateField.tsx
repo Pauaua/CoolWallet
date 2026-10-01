@@ -19,7 +19,7 @@ type DateFieldProps = {
 
 /** Selector de fecha nativo (diálogo en Android, compacto en iOS). */
 export function DateField({ label, value, onChange, maximumDate, error }: DateFieldProps) {
-  const { colors, radius, spacing } = useTheme();
+  const { colors, radius, scheme, spacing } = useTheme();
   const date = parseIsoDate(value);
 
   const openAndroid = () =>
@@ -44,6 +44,7 @@ export function DateField({ label, value, onChange, maximumDate, error }: DateFi
             locale="es-CL"
             maximumDate={maximumDate}
             accentColor={colors.primary}
+            themeVariant={scheme}
             onValueChange={(_event, selected) => onChange(toIsoDate(selected))}
           />
         </View>

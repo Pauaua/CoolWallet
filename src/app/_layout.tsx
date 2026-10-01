@@ -8,6 +8,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Theme as NavigationTheme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -64,6 +65,11 @@ function RootNavigator() {
   const isReady = bootstrap.status === 'ready';
 
   useAutoLock(settings.data?.lockTimeoutMinutes ?? 0, isReady && isOnboarded && !isLocked);
+
+  // Fondo de la ventana nativa (se ve al rotar, en transiciones y bajo el teclado).
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(colors.background);
+  }, [colors.background]);
 
   const navigationTheme = useMemo<NavigationTheme>(() => {
     const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
