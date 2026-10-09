@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Control de Gastos",
+    "name": "CoolWallet",
     "slug": "controlgastos",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,14 @@
     "scheme": "controlgastos",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": false
+      "bundleIdentifier": "cl.coolthings.coolwallet",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "cl.coolthings.coolwallet",
       "adaptiveIcon": {
         "backgroundColor": "#1F6F50",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,7 +48,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Usamos Face ID para desbloquear tu app de control de gastos."
+          "faceIDPermission": "Usamos Face ID para desbloquear CoolWallet y proteger tus datos financieros."
         }
       ],
       [

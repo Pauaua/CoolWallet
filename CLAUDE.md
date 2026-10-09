@@ -110,6 +110,14 @@ src/
 - **Gráficos:** react-native-gifted-charts (funciona en Expo Go; victory-native requiere Skia).
 - **Biometría:** en Expo Go funciona la huella en Android; Face ID en iOS solo en un build propio.
 
+## Publicación
+
+- Nombre público **CoolWallet**; bundle ID / package `cl.coolthings.coolwallet` (no cambiar una vez publicada).
+- Identificadores internos que **no se renombran** aunque digan "control de gastos": `BACKUP_APP_ID = 'control-gastos'` (lo traen los respaldos existentes), `DATABASE_NAME = 'controlgastos.db'`, `slug` y `scheme`.
+- Builds con EAS (`eas.json`): `appVersionSource: remote` + `autoIncrement` en producción → el número de build lo lleva EAS; para una versión visible sube `version` en `app.json`.
+- `ios.config.usesNonExemptEncryption: false` (solo cifrado del sistema + hash del PIN).
+- Textos de la tienda, notas para el revisor y pasos: `docs/app-store.md`. Política de privacidad y soporte (URLs públicas de la ficha): `docs/privacidad.md`, `docs/soporte.md`. Si la app empieza a usar red, analítica o permisos nuevos, actualizar la política y la etiqueta de privacidad.
+
 ## Estado por fase
 
 - [x] **Fase 1 — Base:** tema claro/oscuro, componentes base, Drawer con 8 módulos y "Bloquear app", pantallas vacías navegables.

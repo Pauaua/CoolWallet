@@ -104,14 +104,14 @@ Solo hace falta para lo que Expo Go no permite en Android, como las **notificaci
 2. **JDK 17:** `winget install EclipseAdoptium.Temurin.17.JDK`. No cambies `JAVA_HOME`: el script del proyecto usa el JDK 17 solo mientras compila.
 3. En el teléfono activa **Opciones de desarrollador → Depuración USB**, conéctalo y comprueba con `adb devices`.
 4. Compila e instala: `npm run android:build` (la primera vez tarda 10–20 minutos).
-5. Día a día: `npx expo start` y abre la app **Control de Gastos** instalada. Solo recompila cuando se agregue una librería nativa.
+5. Día a día: `npx expo start` y abre la app **CoolWallet** instalada. Solo recompila cuando se agregue una librería nativa.
 
 > [!NOTE]
 > La app instalada y Expo Go guardan datos por separado. Usa un respaldo para pasarlos de una a otra.
 
 ## 🔐 Tus datos y tu privacidad
 
-- **Nada sale del teléfono** salvo los archivos que tú exportes. La app no hace llamadas de red.
+- **Nada sale del teléfono** salvo los archivos que tú exportes. La app no hace llamadas de red. Ver la [política de privacidad](./docs/privacidad.md) y la página de [soporte](./docs/soporte.md).
 - **PIN:** se guarda solo `SHA-256(sal:PIN)` con una sal aleatoria de 16 bytes, en el almacenamiento seguro del sistema (Keychain / Keystore). Tras 5 intentos fallidos se bloquea 30 s, duplicando la espera hasta un máximo de 15 min.
 - **Respaldo:** *Inicio → Respaldo y datos → Exportar respaldo* crea un `.json` que puedes guardar en Drive, correo o Archivos. La app puede recordártelo cada 7, 14 o 30 días. El PIN **nunca** va en el respaldo.
 - **¿Olvidaste el PIN?** *Olvidé mi PIN → Restaurar un respaldo* (y creas un PIN nuevo) o borrar todo y empezar de cero.

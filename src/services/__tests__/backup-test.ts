@@ -113,7 +113,7 @@ describe('respaldo JSON', () => {
     const { repos } = await populatedDatabase();
     const backup = await createBackup(repos.data, '2026-09-30T12:00:00.000Z');
     expect(backup).toMatchObject({ app: 'control-gastos', schemaVersion: BACKUP_SCHEMA_VERSION, exportedAt: '2026-09-30T12:00:00.000Z' });
-    expect(backupFileName(backup.exportedAt)).toBe('respaldo-control-gastos-2026-09-30.json');
+    expect(backupFileName(backup.exportedAt)).toBe('respaldo-coolwallet-2026-09-30.json');
   });
 
   it('un import fallido no toca los datos actuales', async () => {
@@ -151,7 +151,7 @@ describe('respaldos antiguos', () => {
 describe('parseBackup', () => {
   it('rechaza archivos que no son respaldos', () => {
     expect(parseBackup('no es json')).toEqual({ ok: false, error: 'El archivo no es un JSON válido.' });
-    expect(parseBackup('{"hola":1}')).toEqual({ ok: false, error: 'El archivo no es un respaldo de Control de Gastos.' });
+    expect(parseBackup('{"hola":1}')).toEqual({ ok: false, error: 'El archivo no es un respaldo de CoolWallet.' });
     expect(parseBackup('{"app":"control-gastos"}')).toEqual({ ok: false, error: 'El respaldo no indica su versión.' });
   });
 

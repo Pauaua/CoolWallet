@@ -90,7 +90,7 @@ export default function RestoreScreen() {
           <Button label="Elegir otro archivo" variant="ghost" onPress={() => pick.mutate()} />
         </>
       ) : (
-        <AppText color="textSecondary">El archivo se llama algo como “respaldo-control-gastos-2026-09-30.json”.</AppText>
+        <AppText color="textSecondary">El archivo se llama algo como “respaldo-coolwallet-2026-09-30.json”.</AppText>
       )}
       {importBackup.isError ? <Notice tone="danger" message="No pudimos restaurar el respaldo. Tus datos no cambiaron." /> : null}
     </FormScreen>

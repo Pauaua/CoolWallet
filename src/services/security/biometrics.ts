@@ -22,7 +22,7 @@ export async function getBiometricSupport(): Promise<BiometricSupport> {
 }
 
 /** Pide huella/Face ID. Devuelve `true` solo si la autenticación fue exitosa. */
-export async function authenticateWithBiometrics(promptMessage = 'Desbloquear Control de Gastos'): Promise<boolean> {
+export async function authenticateWithBiometrics(promptMessage = 'Desbloquear CoolWallet'): Promise<boolean> {
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage,
     cancelLabel: 'Usar PIN',

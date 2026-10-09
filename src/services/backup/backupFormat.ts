@@ -20,6 +20,7 @@ import {
  * que un respaldo antiguo necesite transformarse, y agrega su paso en `BACKUP_MIGRATIONS`.
  */
 export const BACKUP_SCHEMA_VERSION = 2;
+/** Identificador interno del formato (no cambiar: lo traen todos los respaldos existentes). */
 export const BACKUP_APP_ID = 'control-gastos';
 
 /** Tablas del respaldo, en orden seguro para insertar (padres antes que hijos). */
@@ -67,7 +68,7 @@ export type BackupFile = z.infer<typeof backupFileSchema>;
 
 /** Encabezado mínimo para leer la versión antes de validar el contenido completo. */
 const backupHeaderSchema = z.object({
-  app: z.literal(BACKUP_APP_ID, { error: 'El archivo no es un respaldo de Control de Gastos.' }),
+  app: z.literal(BACKUP_APP_ID, { error: 'El archivo no es un respaldo de CoolWallet.' }),
   schemaVersion: z.number({ error: 'El respaldo no indica su versión.' }).int().min(1),
 });
 
@@ -151,7 +152,7 @@ export function summarizeBackup(backup: BackupFile): BackupSummary {
   };
 }
 
-/** Nombre sugerido del archivo: `respaldo-control-gastos-2026-09-30.json`. */
+/** Nombre sugerido del archivo: `respaldo-coolwallet-2026-09-30.json`. */
 export function backupFileName(isoDate: string): string {
-  return `respaldo-control-gastos-${isoDate.slice(0, 10)}.json`;
+  return `respaldo-coolwallet-${isoDate.slice(0, 10)}.json`;
 }
